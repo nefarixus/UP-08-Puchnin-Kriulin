@@ -40,12 +40,13 @@
                 <p class="h2">Консультации</p>
                 <a href="./pages/consultations.php">Перейти</a>
             </div>
-             <div class="card">
+            <div class="card">
                 <p class="h2">Занятия</p>
                 <a href="./pages/lessons.php">Перейти</a>
             </div>
         </div>
-    </main>
+</main>
+    <!-- тест пуша-->
 <?php
     include_once "./includes/parts/footer.php";
 ?>

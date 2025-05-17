@@ -1,47 +1,79 @@
 <?php
-require_once "../includes/parts/connection.php";
-include_once "../includes/parts/header.php";
+    require_once "../includes/parts/connection.php";
+    require_once "../models/Discipline.php";
+    include_once "../includes/parts/header.php";
 
-
-$query = mysqli_query($db_connection, "SELECT * FROM Disciplines");
-?>
-
-<main>
-    <h1>Дисциплины</h1>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Наименование дисциплины</th>
-                <th>Действие</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = mysqli_fetch_assoc($query)) : ?>
-                <tr>
-                    <td><?=htmlspecialchars($row['discipline_name'])?></td>
-                    <td>
-                        <a href="edit_students.php?id=<?= $row['discipline_id'] ?>" class="edit-students-btn">Редактировать</a>
-                        <form method="POST" action="students.php" style="display: inline;">
-                            <input type="hidden" name="student_id" value="<?= $row['discipline_id'] ?>">
-                            <button type="submit" name="DELETE_RECORD_STUDENT" class="delete-students-btn">Удаление</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
-</main>
-<?php
-include_once "../includes/parts/footer.php";
-?>
-<?php
-    if (isset($_POST['DELETE_RECORD_STUDENT']) && isset($_POST['student_id'])) {
-        $id_account = $_POST['student_id'];
-        $query = "DELETE FROM Students WHERE student_id = '$id_account'";
-        $resultDelete = mysqli_query($db_connection, $query) or die ("Ошибка в запросе: " . mysqli_error($db_connection));
-        header("Location: students.php");
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
+        $item = new Discipline();
+        foreach ($_POST as $key => $value) {
+            if (property_exists($item, $key)) {
+                $item->{$key} = $value;
+            }
+        }
+        $item->Insert();
+        header("Location: disciplines.php");
         exit();
     }
 
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
+        $item = new Discipline();
+        $item->discipline_id = $_POST['discipline_id'];
+        foreach ($_POST as $key => $value) {
+            if (property_exists($item, $key)) {
+                $item->{$key} = $value;
+            }
+        }
+        $item->Update();
+        header("Location: disciplines.php");
+        exit();
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
+        $item = new Discipline();
+        $item->discipline_id = $_POST['discipline_id'];
+        $item->Delete();
+        header("Location: disciplines.php");
+        exit();
+    }
+
+    $items = Discipline::Get();
+?>
+
+<main>
+    <h1 style="margin-bottom: 20px;">Дисциплины</h1>
+
+    <h2 style="margin-bottom: 20px;">Добавить дисциплину</h2>
+    <form method="post">
+        <input type="text" name="discipline_name" placeholder="Название дисциплины"><br>
+        <button type="submit" name="create">Добавить</button>
+    </form>
+
+    <h2 style="margin-top: 20px;">Существующие дисциплины</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Название дисциплины</th>
+            <th>Действия</th>
+        </tr>
+        <?php foreach ($items as $item): ?>
+            <tr>
+                <td><?= $item->discipline_id ?></td>
+                <td><?= $item->discipline_name ?></td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="discipline_id" value="<?= $item->discipline_id ?>">
+                        <input type="text" name="discipline_name" value="<?= $item->discipline_name ?>">
+                        <button type="submit" name="update">Обновить</button>
+                    </form>
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="discipline_id" value="<?= $item->discipline_id ?>">
+                        <button type="submit" name="delete">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+</main>
+<?php
+    include_once "../includes/parts/footer.php";
 ?>
