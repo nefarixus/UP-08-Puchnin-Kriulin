@@ -44,13 +44,13 @@
     <h2 style="margin-bottom: 20px;">Добавить занятиe</h2>
 
 
-    <form method="post">
+    <form class="add_form" method="post">
         <input type="number" name="program_id" placeholder="ID программы"><br>
         <input type="number" name="group_id" placeholder="ID группы"><br>
         <input type="number" name="teacher_id" placeholder="ID преподавателя"><br>
         <input type="datetime-local" name="lesson_date"><br>
         <input type="number" name="duration_minutes" placeholder="Длительность (минуты)"><br>
-        <button type="submit" name="create">Добавить</button>
+        <button class="add-students-btn" type="submit" name="create">Добавить</button>
     </form>
 
     <h2 style="margin-top: 20px;">Существующие занятия</h2>
@@ -80,11 +80,11 @@
                         <input type="number" name="teacher_id" value="<?= $item->teacher_id ?>">
                         <input type="datetime-local" name="lesson_date" value="<?= substr($item->lesson_date, 0, 16) ?>">
                         <input type="number" name="duration_minutes" value="<?= $item->duration_minutes ?>">
-                        <button type="submit" name="update">Обновить</button>
+                        <button class="edit-students-btn" type="submit" name="update">Обновить</button>
                     </form>
                     <form method="post" style="display:inline;">
                         <input type="hidden" name="lesson_id" value="<?= $item->lesson_id ?>">
-                        <button type="submit" name="delete">Удалить</button>
+                        <button class="delete-students-btn" type="submit" name="delete">Удалить</button>
                     </form>
                 </td>
             </tr>

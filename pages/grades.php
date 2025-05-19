@@ -43,12 +43,12 @@
     <h1 style="margin-bottom: 20px;">Оценки</h1>
 
     <h2 style="margin-bottom: 20px;">Добавить оценку</h2>
-    <form method="post">
+    <form class="add_form" method="post">
         <input type="number" name="lesson_id" placeholder="ID занятия"><br>
         <input type="number" name="student_id" placeholder="ID студента"><br>
         <input type="number" name="grade_value" placeholder="Оценка"><br>
         <input type="text" name="color" placeholder="Цвет (например #0CAC0C)"><br>
-        <button type="submit" name="create">Добавить</button>
+        <button class="add-students-btn" type="submit" name="create">Добавить</button>
     </form>
 
     <h2 style="margin-top: 20px;">Существующие оценки</h2>
@@ -75,11 +75,11 @@
                         <input type="number" name="student_id" value="<?= $item->student_id ?>">
                         <input type="number" name="grade_value" value="<?= $item->grade_value ?>">
                         <input type="text" name="color" value="<?= $item->color ?? '' ?>">
-                        <button type="submit" name="update">Обновить</button>
+                        <button class="edit-students-btn" type="submit" name="update">Обновить</button>
                     </form>
                     <form method="post" style="display:inline;">
                         <input type="hidden" name="grade_id" value="<?= $item->grade_id ?>">
-                        <button  type="submit" name="delete">Удалить</button>
+                        <button class="delete-students-btn" type="submit" name="delete">Удалить</button>
                     </form>
                 </td>
             </tr>

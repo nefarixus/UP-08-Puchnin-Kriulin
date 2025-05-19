@@ -42,13 +42,13 @@
         <h1 style="margin-bottom: 20px;">Студенты</h1>
 
         <h2 style="margin-bottom: 20px;">Добавить студента</h2>
-        <form method="post">
+        <form class="add_form" method="post">
             <input type="text" name="last_name" placeholder="Фамилия"><br>
             <input type="text" name="first_name" placeholder="Имя"><br>
             <input type="text" name="middle_name" placeholder="Отчество"><br>
             <input type="number" name="group_id" placeholder="ID группы"><br>
             <input type="date" name="dismissal_date"><br>
-            <button type="submit" name="create">Добавить</button>
+            <button class="add-students-btn" type="submit" name="create">Добавить</button>
         </form>
 
         <h2 style="margin-top: 20px;">Существующие студенты</h2>
@@ -78,11 +78,11 @@
                             <input type="text" name="middle_name" value="<?= $item->middle_name ?? '' ?>">
                             <input type="number" name="group_id" value="<?= $item->group_id ?? '' ?>">
                             <input type="date" name="dismissal_date" value="<?= $item->dismissal_date ?? '' ?>">
-                            <button type="submit" name="update">Обновить</button>
+                            <button class="edit-students-btn" type="submit" name="update">Обновить</button>
                         </form>
                         <form method="post" style="display:inline;">
                             <input type="hidden" name="student_id" value="<?= $item->student_id ?>">
-                            <button type="submit" name="delete">Удалить</button>
+                            <button class="delete-students-btn" type="submit" name="delete">Удалить</button>
                         </form>
                     </td>
                 </tr>

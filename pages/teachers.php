@@ -42,13 +42,13 @@
         <h1 style="margin-bottom: 20px;">Преподаватели</h1>
 
         <h2 style="margin-bottom: 20px;">Добавить преподавателя</h2>
-        <form method="post">
+        <form class="add_form" method="post">
             <input type="text" name="last_name" placeholder="Фамилия"><br>
             <input type="text" name="first_name" placeholder="Имя"><br>
             <input type="text" name="middle_name" placeholder="Отчество"><br>
             <input type="text" name="login" placeholder="Логин"><br>
             <input type="text" name="password" placeholder="Пароль"><br>
-            <button type="submit" name="create">Добавить</button>
+            <button class="add-students-btn" type="submit" name="create">Добавить</button>
         </form>
 
         <h2 style="margin-top: 20px;">Существующие преподаватели</h2>
@@ -78,11 +78,11 @@
                             <input type="text" name="middle_name" value="<?= $item->middle_name ?? '' ?>">
                             <input type="text" name="login" value="<?= $item->login ?>">
                             <input type="text" name="password" value="<?= $item->password ?>">
-                            <button type="submit" name="update">Обновить</button>
+                            <button class="edit-students-btn" type="submit" name="update">Обновить</button>
                         </form>
                         <form method="post" style="display:inline;">
                             <input type="hidden" name="teacher_id" value="<?= $item->teacher_id ?>">
-                            <button type="submit" name="delete">Удалить</button>
+                            <button class="delete-students-btn" type="submit" name="delete">Удалить</button>
                         </form>
                     </td>
                 </tr>

@@ -43,7 +43,7 @@
     <h1 style="margin-bottom: 20px;">Нагрузка преподавателей</h1>
 
     <h2 style="margin-bottom: 20px;">Добавить преподавательскую нагрузку</h2>
-    <form method="post">
+    <form class="add_form" method="post">
         <input type="number" name="teacher_id" placeholder="ID преподавателя"><br>
         <input type="number" name="discipline_id" placeholder="ID дисциплины"><br>
         <input type="number" name="group_id" placeholder="ID группы"><br>
@@ -52,7 +52,7 @@
         <input type="number" name="consultation_hours" placeholder="Консультации (часов)"><br>
         <input type="number" name="course_project_hours" placeholder="Курсовой проект (часов)"><br>
         <input type="number" name="exam_hours" placeholder="Экзамены (часов)"><br>
-        <button type="submit" name="create">Добавить</button>
+        <button class="add-students-btn" type="submit" name="create">Добавить</button>
     </form>
 
     <h2 style="margin-top: 20px;">Существующие преподавательские нагрузки</h2>
@@ -91,11 +91,11 @@
                         <input type="number" name="consultation_hours" value="<?= $item->consultation_hours ?>">
                         <input type="number" name="course_project_hours" value="<?= $item->course_project_hours ?>">
                         <input type="number" name="exam_hours" value="<?= $item->exam_hours ?>">
-                        <button type="submit" name="update">Обновить</button>
+                        <button class="edit-students-btn" type="submit" name="update">Обновить</button>
                     </form>
                     <form method="post" style="display:inline;">
                         <input type="hidden" name="workload_id" value="<?= $item->workload_id ?>">
-                        <button type="submit" name="delete">Удалить</button>
+                        <button class="delete-students-btn" type="submit" name="delete">Удалить</button>
                     </form>
                 </td>
             </tr>

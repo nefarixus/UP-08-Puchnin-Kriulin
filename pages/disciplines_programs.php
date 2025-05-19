@@ -43,12 +43,12 @@
     <h1 style="margin-bottom: 20px;">Программа дисциплины</h1>
 
     <h2 style="margin-bottom: 20px;">Добавить программу дисциплины</h2>
-    <form method="post">
+    <form class="add_form" method="post">
         <input type="number" name="discipline_id" placeholder="ID дисциплины"><br>
         <input type="text" name="topic" placeholder="Тема"><br>
         <input type="text" name="lesson_type" placeholder="Тип занятия"><br>
         <input type="number" name="hours" placeholder="Часов"><br>
-        <button type="submit" name="create">Добавить</button>
+        <button class="add-students-btn" type="submit" name="create">Добавить</button>
     </form>
 
     <h2 style="margin-top: 20px;">Существующие программы дисциплины</h2>
@@ -75,11 +75,11 @@
                         <input type="text" name="topic" value="<?= $item->topic ?>">
                         <input type="text" name="lesson_type" value="<?= $item->lesson_type ?>">
                         <input type="number" name="hours" value="<?= $item->hours ?>">
-                        <button type="submit" name="update">Обновить</button>
+                        <button class="edit-students-btn" type="submit" name="update">Обновить</button>
                     </form>
                     <form method="post" style="display:inline;">
                         <input type="hidden" name="program_id" value="<?= $item->program_id ?>">
-                        <button type="submit" name="delete">Удалить</button>
+                        <button class="delete-students-btn" type="submit" name="delete">Удалить</button>
                     </form>
                 </td>
             </tr>

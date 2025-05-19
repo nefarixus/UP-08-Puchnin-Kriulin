@@ -107,6 +107,26 @@ main .card a:hover {
     background: #008cff;
 }
 
+main form
+input[type="text"],
+input[type="number"], 
+input[type="date"],
+input[type="datetime-local"] {
+    background-color: white;
+    border: 1px solid #0060AC;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.add_form
+input[type="text"],
+input[type="number"], 
+input[type="date"],
+input[type="datetime-local"],
+button {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
 /* cards-students */
 
 .students-card-info {
@@ -139,6 +159,19 @@ main .card a:hover {
     text-align: center;
     width: 100px;
 }
+.add-students-btn {
+    border: 1px solid #0060AC;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    color: black;
+    transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+}
+.add-students-btn:hover {
+    color: white;
+    border: 1px solid #0CAC0C;
+    background: #0CAC0C;
+}
 .edit-students-btn {
     border: 1px solid #0060AC;
     background: white;
@@ -146,6 +179,11 @@ main .card a:hover {
     border-radius: 5px;
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+.edit-students-btn:hover {
+    color: white;
+    border: 1px solid #0060AC;
+    background: #0060AC;
 }
 .delete-students-btn{
     border: 1px solid #E41613;
@@ -155,12 +193,9 @@ main .card a:hover {
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
-.edit-students-btn:hover {
-    color: white;
-    background: #0060AC;
-}
 .delete-students-btn:hover {
     color: white;
+    border: 1px solid #E41613;
     background: #E41613;
 }
 
@@ -195,7 +230,6 @@ tr:hover {
 /* footer */
 
 footer {
-    position: absolute;
     width: 100%;
     bottom: 0;
     display: flex;
