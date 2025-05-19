@@ -46,7 +46,6 @@
             </div>
         </div>
 </main>
-    <!-- тест пуша-->
 <?php
     include_once "./includes/parts/footer.php";
 ?>
