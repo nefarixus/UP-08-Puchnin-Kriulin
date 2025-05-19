@@ -246,3 +246,21 @@ footer {
     background: #0060AC;
     padding: 30px;
 }
+
+
+ /* Grade */
+
+
+
+.grade2{
+    background-color: #E41613;
+}
+.grade3{
+    background-color: #EC9704;
+}
+.grade4{
+    background-color: #F0C72A;
+}
+.grade5{
+    background-color: #0CAC0C;
+}

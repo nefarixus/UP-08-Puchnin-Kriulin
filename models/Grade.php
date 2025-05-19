@@ -32,10 +32,10 @@
         public function Insert() {
             global $db_connection;
             $query = "INSERT INTO Grades (
-                        lesson_id, student_id, grade_value, color
+                        lesson_id, student_id, grade_value
                     ) VALUES (
                         '$this->lesson_id', '$this->student_id',
-                        '$this->grade_value', '$this->color'
+                        '$this->grade_value'
                     )";
             return mysqli_query($db_connection, $query);
         }
@@ -46,8 +46,7 @@
             $query = "UPDATE Grades SET
                         lesson_id = '$this->lesson_id',
                         student_id = '$this->student_id',
-                        grade_value = '$this->grade_value',
-                        color = '$this->color'
+                        grade_value = '$this->grade_value'
                     WHERE grade_id = $this->grade_id";
             return mysqli_query($db_connection, $query);
         }
