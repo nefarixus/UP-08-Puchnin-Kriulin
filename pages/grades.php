@@ -52,7 +52,7 @@
     </form>
 
     <h2 style="margin-top: 20px;">Существующие оценки</h2>
-    <table border="1">
+    <table>
         <tr>
             <th>ID</th>
             <th>ID занятия</th>
