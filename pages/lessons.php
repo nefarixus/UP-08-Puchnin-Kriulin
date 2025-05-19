@@ -54,7 +54,7 @@
     </form>
 
     <h2 style="margin-top: 20px;">Существующие занятия</h2>
-    <table border="1">
+    <table>
         <tr>
             <th>ID</th>
             <th>ID программы</th>

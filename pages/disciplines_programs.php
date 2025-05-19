@@ -52,7 +52,7 @@
     </form>
 
     <h2 style="margin-top: 20px;">Существующие программы дисциплины</h2>
-    <table border="1">
+    <table>
         <tr>
             <th>ID</th>
             <th>ID дисциплины</th>

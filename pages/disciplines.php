@@ -49,7 +49,7 @@
     </form>
 
     <h2 style="margin-top: 20px;">Существующие дисциплины</h2>
-    <table border="1">
+    <table>
         <tr>
             <th>ID</th>
             <th>Название дисциплины</th>
