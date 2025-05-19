@@ -37,6 +37,7 @@
     }
 
     $items = Grade::Get();
+
 ?>
 
 <main>
@@ -47,7 +48,6 @@
         <input type="number" name="lesson_id" placeholder="ID занятия"><br>
         <input type="number" name="student_id" placeholder="ID студента"><br>
         <input type="number" name="grade_value" placeholder="Оценка"><br>
-        <input type="text" name="color" placeholder="Цвет (например #0CAC0C)"><br>
         <button class="add-students-btn" type="submit" name="create">Добавить</button>
     </form>
 
@@ -66,8 +66,18 @@
                 <td><?= $item->grade_id ?></td>
                 <td><?= $item->lesson_id ?></td>
                 <td><?= $item->student_id ?></td>
-                <td><?= $item->grade_value ?></td>
-                <td><?= $item->color ?? '' ?></td>
+                <td><?php 
+                    $grade = $item->grade_value;
+                    $class = match($grade){
+                        2 => 'grade2',
+                        3 => 'grade3',
+                        4 => 'grade4',
+                        5 => 'grade5',
+                        default => ''
+                    };
+                ?>
+                <input type="number" name="grade_value" id="grade_<?=$item->$grade_id?>" value="<?=$grade?>"  class="<?=$class?>" min="2" max="5"></td>
+                <td class="<?=$class?>"><?= $item->color ?? '' ?></td>
                 <td>
                     <form method="post" style="display:inline;">
                         <input type="hidden" name="grade_id" value="<?= $item->grade_id ?>">
@@ -83,6 +93,16 @@
                     </form>
                 </td>
             </tr>
+            <script>
+                document.getElementById('grade_<?= $item -> grade_id ?>').addEventListener('input', function() {
+                    let value = parsetInt(this.value)
+                    let classes = ['grade2', 'grade3', 'grade4', 'grade5']
+                    classes.forEach(c => this.classList.remove(c));
+                    if(value >= 2 && <= 5){
+                        this.classList.add('grade-' + value);
+                    }
+                });
+            </script>
         <?php endforeach; ?>
     </table>
 </main>
