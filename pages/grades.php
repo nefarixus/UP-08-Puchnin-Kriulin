@@ -58,7 +58,6 @@
             <th>ID занятия</th>
             <th>ID студента</th>
             <th>Оценка</th>
-            <th>Цвет</th>
             <th>Действия</th>
         </tr>
         <?php foreach ($items as $item): ?>
@@ -66,9 +65,9 @@
                 <td><?= $item->grade_id ?></td>
                 <td><?= $item->lesson_id ?></td>
                 <td><?= $item->student_id ?></td>
-                <td><?php 
-                    $grade = $item->grade_value;
-                    $class = match($grade){
+                <?php 
+                    $grade = (int)$item->grade_value;
+                    $class = match($grade) {
                         2 => 'grade2',
                         3 => 'grade3',
                         4 => 'grade4',
@@ -76,15 +75,13 @@
                         default => ''
                     };
                 ?>
-                <input type="number" name="grade_value" id="grade_<?=$item->$grade_id?>" value="<?=$grade?>"  class="<?=$class?>" min="2" max="5"></td>
-                <td class="<?=$class?>"><?= $item->color ?? '' ?></td>
+                <td style="text-align: center; color: white;" class="<?= $class ?>"><?= $grade ?></td>
                 <td>
                     <form method="post" style="display:inline;">
                         <input type="hidden" name="grade_id" value="<?= $item->grade_id ?>">
                         <input type="number" name="lesson_id" value="<?= $item->lesson_id ?>">
                         <input type="number" name="student_id" value="<?= $item->student_id ?>">
-                        <input type="number" name="grade_value" value="<?= $item->grade_value ?>">
-                        <input type="text" name="color" value="<?= $item->color ?? '' ?>">
+                        <input type="number" name="grade_value" value="<?= $item->grade_value ?>" min="2" max="5" step="1">
                         <button class="edit-students-btn" type="submit" name="update">Обновить</button>
                     </form>
                     <form method="post" style="display:inline;">
@@ -94,13 +91,22 @@
                 </td>
             </tr>
             <script>
-                document.getElementById('grade_<?= $item -> grade_id ?>').addEventListener('input', function() {
-                    let value = parsetInt(this.value)
-                    let classes = ['grade2', 'grade3', 'grade4', 'grade5']
-                    classes.forEach(c => this.classList.remove(c));
-                    if(value >= 2 && <= 5){
-                        this.classList.add('grade-' + value);
-                    }
+                document.addEventListener("DOMContentLoaded", function () {
+                    const input = document.getElementById('grade_<?= $item->grade_id ?>');
+                    if (!input) return;
+
+                    input.addEventListener('input', function () {
+                        let value = parseInt(this.value);
+                        let classes = ['grade2', 'grade3', 'grade4', 'grade5'];
+
+                        // Удаляем старые классы
+                        classes.forEach(c => this.classList.remove(c));
+
+                        // Добавляем нужный класс, если значение в диапазоне
+                        if (value >= 2 && value <= 5) {
+                            this.classList.add('grade' + value);
+                        }
+                    });
                 });
             </script>
         <?php endforeach; ?>
