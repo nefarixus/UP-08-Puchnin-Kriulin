@@ -26,13 +26,15 @@ class Discipline {
 
     public function Insert() {
         global $db_connection;
-        $query = "INSERT INTO Disciplines (discipline_name) VALUES ('$this->discipline_name')";
+        $query = "INSERT INTO Disciplines (discipline_name)
+                  VALUES ('$this->discipline_name')";
         return mysqli_query($db_connection, $query);
     }
 
     public function Update() {
         global $db_connection;
-        $query = "UPDATE Disciplines SET discipline_name = '$this->discipline_name'
+        $query = "UPDATE Disciplines SET
+                    discipline_name = '$this->discipline_name'
                   WHERE discipline_id = $this->discipline_id";
         return mysqli_query($db_connection, $query);
     }

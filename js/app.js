@@ -81,4 +81,80 @@ $(document).ready(function () {
             loadStudents();
         });
     });
+
+    // --- Дисциплины ---
+    const tableBodyDisciplines = $('#disciplines-table tbody');
+
+    function loadDisciplines() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', function (data) {
+            tableBodyDisciplines.empty();
+
+            data.forEach(discipline => {
+                const row = `
+                    <tr data-id="${discipline.discipline_id}">
+                        <td>${discipline.discipline_id}</td>
+                        <td contenteditable="true" class="edit-discipline-name">${discipline.discipline_name}</td>
+                        <td>
+                            <button class="save-btn edit-students-btn">Сохранить</button>
+                            <button class="delete-btn delete-students-btn">Удалить</button>
+                        </td>
+                    </tr>
+                `;
+                tableBodyDisciplines.append(row);
+            });
+        }, 'json');
+    }
+
+    // Загрузка при открытии страницы
+    if ($('#disciplines-table').length > 0) {
+        loadDisciplines();
+    }
+
+    // Добавление дисциплины
+    $('#add-discipline-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+
+        const data = { action: 'create' };
+        formData.forEach(field => {
+            data[field.name] = field.value;
+        });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(data), function () {
+            $('#add-discipline-form')[0].reset();
+            loadDisciplines();
+        });
+    });
+
+    // Сохранение изменений
+    $(document).on('click', '.save-btn', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const discipline = {
+            action: 'update',
+            discipline_id: id,
+            discipline_name: row.find('.edit-discipline-name').text()
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(discipline), function () {
+            loadDisciplines();
+        });
+    });
+
+    // Удаление дисциплины
+    $(document).on('click', '.delete-btn', function () {
+        const id = $(this).closest('tr').data('id');
+
+        const data = {
+            action: 'delete',
+            discipline_id: id
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(data), function () {
+            loadDisciplines();
+        });
+    });
+
+
 });
