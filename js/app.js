@@ -226,7 +226,7 @@ $(document).ready(function () {
     });
 
     const tableBodyGroups = $('#groups-table tbody');
-    
+
     function loadGroups() {
         $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function (data) {
             tableBodyGroups.empty();
@@ -281,6 +281,75 @@ $(document).ready(function () {
         const data = { action: 'delete', group_id: id };
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(data), function () {
             loadGroups();
+        });
+    });
+
+    const tableBodyPrograms = $('#programs-table tbody');
+
+    function loadPrograms() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/program_api.php', function (data) {
+            tableBodyPrograms.empty();
+
+            data.forEach(program => {
+                const row = `
+                    <tr data-id="${program.program_id}">
+                        <td>${program.program_id}</td>
+                        <td contenteditable="true" class="edit-discipline-id">${program.discipline_id}</td>
+                        <td contenteditable="true" class="edit-topic">${program.topic}</td>
+                        <td contenteditable="true" class="edit-lesson-type">${program.lesson_type}</td>
+                        <td contenteditable="true" class="edit-hours">${program.hours}</td>
+                        <td>
+                            <button class="save-btn edit-program-btn">Сохранить</button>
+                            <button class="delete-btn delete-program-btn">Удалить</button>
+                        </td>
+                    </tr>`;
+                tableBodyPrograms.append(row);
+            });
+        }, 'json');
+    }
+
+    // Автозагрузка при открытии страницы
+    if ($('#programs-table').length > 0) {
+        loadPrograms();
+    }
+
+    // Добавление программы
+    $('#add-program-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+        const data = { action: 'create' };
+        formData.forEach(field => data[field.name] = field.value);
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/program_api.php', JSON.stringify(data), function () {
+            $('#add-program-form')[0].reset();
+            loadPrograms();
+        });
+    });
+
+    // Обновление программы
+    $(document).on('click', '.save-btn', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const program = {
+            action: 'update',
+            program_id: id,
+            discipline_id: row.find('.edit-discipline-id').text(),
+            topic: row.find('.edit-topic').text(),
+            lesson_type: row.find('.edit-lesson-type').text(),
+            hours: row.find('.edit-hours').text()
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/program_api.php', JSON.stringify(program), function () {
+            loadPrograms();
+        });
+    });
+
+    // Удаление программы
+    $(document).on('click', '.delete-btn', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', program_id: id };
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/program_api.php', JSON.stringify(data), function () {
+            loadPrograms();
         });
     });
 });
