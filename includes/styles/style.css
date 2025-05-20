@@ -168,7 +168,7 @@ button {
     text-align: center;
     width: 100px;
 }
-.add-students-btn {
+.add-students-btn, .add-disciplines-btn, .add-absences-btn, .add-groups-btn, .add-programs-btn, .add-teachers-btn {
     border: 1px solid #0060AC;
     background: white;
     padding: 10px;
@@ -176,7 +176,7 @@ button {
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
 }
-.add-students-btn:hover {
+.add-students-btn:hover, .add-disciplines-btn:hover, .add-absences-btn:hover, .add-groups-btn:hover, .add-programs-btn:hover, .add-teachers-btn:hover {
     color: white;
     border: 1px solid #0CAC0C;
     background: #0CAC0C;

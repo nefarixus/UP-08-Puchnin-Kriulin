@@ -6,7 +6,7 @@
     <h2 style="margin-top: 15px;">Добавить группу</h2>
     <form id="add-group-form" class="add_form">
         <input type="text" name="group_name" placeholder="Название группы"><br>
-        <button type="submit" class="add-students-btn">Добавить</button>
+        <button type="submit" class="add-groups-btn">Добавить</button>
     </form>
 
     <h2 style="margin-top: 15px;">Список групп</h2>

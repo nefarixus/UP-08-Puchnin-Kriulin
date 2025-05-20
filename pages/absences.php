@@ -9,7 +9,7 @@
         <input type="number" name="student_id" placeholder="ID студента"><br>
         <input type="number" name="minutes_missed" placeholder="Минут пропущено"><br>
         <input type="text" name="explanatory_note_path" placeholder="Пояснение (путь)"><br>
-        <button type="submit" class="add-students-btn">Добавить</button>
+        <button type="submit" class="add-absences-btn">Добавить</button>
     </form>
 
     <h2 style="margin-top: 15px;">Список пропусков</h2>

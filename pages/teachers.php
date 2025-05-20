@@ -4,13 +4,13 @@
     <h1>Преподаватели</h1>
 
     <h2 style="margin-top: 15px;">Добавить преподавателя</h2>
-    <form id="teachers-table" class="add_form">
+    <form id="add-teacher-form" class="add_form">
         <input type="text" name="last_name" placeholder="Фамилия"><br>
         <input type="text" name="first_name" placeholder="Имя"><br>
         <input type="text" name="middle_name" placeholder="Отчество"><br>
         <input type="text" name="login" placeholder="Логин"><br>
         <input type="text" name="password" placeholder="Пароль"><br>
-        <button type="submit" class="add-students-btn">Добавить</button>
+        <button type="submit" class="add-teachers-btn">Добавить</button>
     </form>
 
     <h2 style="margin-top: 15px;">Список преподавателей</h2>
