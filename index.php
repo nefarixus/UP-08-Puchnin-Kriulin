@@ -54,6 +54,11 @@
                 <p class="h2">Занятия</p>
                 <a href="./pages/lessons.php">Перейти</a>
             </div>
+            <div class="card">
+                <img src="./includes/images/lessons.png" alt="">
+                <p class="h2">Занятия</p>
+                <a href="./pages/lessons.php">Перейти</a>
+            </div>
         </div>
 </main>
 <?php
