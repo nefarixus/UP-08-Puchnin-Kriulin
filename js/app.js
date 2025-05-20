@@ -224,4 +224,63 @@ $(document).ready(function () {
             loadAbsences();
         });
     });
+
+    const tableBodyGroups = $('#groups-table tbody');
+    
+    function loadGroups() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function (data) {
+            tableBodyGroups.empty();
+
+            data.forEach(group => {
+                const row = `
+                    <tr data-id="${group.group_id}">
+                        <td>${group.group_id}</td>
+                        <td contenteditable="true" class="edit-group-name">${group.group_name}</td>
+                        <td>
+                            <button class="save-btn edit-group-btn">Сохранить</button>
+                            <button class="delete-btn delete-group-btn">Удалить</button>
+                        </td>
+                    </tr>`;
+                tableBodyGroups.append(row);
+            });
+        }, 'json');
+    }
+
+    if ($('#groups-table').length > 0) {
+        loadGroups();
+    }
+
+    $('#add-group-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+        const data = { action: 'create' };
+        formData.forEach(field => data[field.name] = field.value);
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(data), function () {
+            $('#add-group-form')[0].reset();
+            loadGroups();
+        });
+    });
+
+    $(document).on('click', '.save-btn', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const group = {
+            action: 'update',
+            group_id: id,
+            group_name: row.find('.edit-group-name').text()
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(group), function () {
+            loadGroups();
+        });
+    });
+
+    $(document).on('click', '.delete-btn', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', group_id: id };
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(data), function () {
+            loadGroups();
+        });
+    });
 });
