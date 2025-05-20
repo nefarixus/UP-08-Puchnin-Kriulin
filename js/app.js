@@ -352,4 +352,75 @@ $(document).ready(function () {
             loadPrograms();
         });
     });
+
+    const tableBodyTeachers = $('#teachers-table tbody');
+
+    function loadTeachers() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', function (data) {
+            tableBodyTeachers.empty();
+
+            data.forEach(teacher => {
+                const row = `
+                    <tr data-id="${teacher.teacher_id}">
+                        <td>${teacher.teacher_id}</td>
+                        <td contenteditable="true" class="edit-last-name">${teacher.last_name}</td>
+                        <td contenteditable="true" class="edit-first-name">${teacher.first_name}</td>
+                        <td contenteditable="true" class="edit-middle-name">${teacher.middle_name || ''}</td>
+                        <td contenteditable="true" class="edit-login">${teacher.login}</td>
+                        <td contenteditable="true" class="edit-password">${teacher.password}</td>
+                        <td>
+                            <button class="save-btn edit-teachers-btn">Сохранить</button>
+                            <button class="delete-btn delete-teachers-btn">Удалить</button>
+                        </td>
+                    </tr>`;
+                tableBodyTeachers.append(row);
+            });
+        }, 'json');
+    }
+
+    // Автозагрузка
+    if ($('#teachers-table').length > 0) {
+        loadTeachers();
+    }
+
+    // Добавление
+    $('#add-teacher-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+        const data = { action: 'create' };
+        formData.forEach(field => data[field.name] = field.value);
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(data), function () {
+            $('#add-teacher-form')[0].reset();
+            loadTeachers();
+        });
+    });
+
+    // Обновление
+    $(document).on('click', '.save-btn', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const teacher = {
+            action: 'update',
+            teacher_id: id,
+            last_name: row.find('.edit-last-name').text(),
+            first_name: row.find('.edit-first-name').text(),
+            middle_name: row.find('.edit-middle-name').text() || null,
+            login: row.find('.edit-login').text(),
+            password: row.find('.edit-password').text()
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(teacher), function () {
+            loadTeachers();
+        });
+    });
+
+    // Удаление
+    $(document).on('click', '.delete-btn', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', teacher_id: id };
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(data), function () {
+            loadTeachers();
+        });
+    });
 });
