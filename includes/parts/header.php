@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="/UP-08-Puchnin-Kriulin/includes/styles/style.css">
     <script src="/UP-08-Puchnin-Kriulin/js/jquery-3.7.1.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <script src="/UP-08-Puchnin-Kriulin/js/jquery-3.7.1.min.js"></script>
     <title>УП-08</title>
 </head>
 <body>
