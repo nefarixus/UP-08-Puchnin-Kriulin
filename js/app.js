@@ -3,9 +3,16 @@ $(document).ready(function () {
     // --- STUDENTS ---
     const tableBodyStudents = $('#students-table tbody');
 
-    function loadStudents() {
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', function (data) {
+    function loadStudents(searchQuery = '') {
+        let url = '/UP-08-Puchnin-Kriulin/controllers/api/student_api.php';
+
+        if (searchQuery) {
+            url += '?search=' + encodeURIComponent(searchQuery);
+        }
+
+        $.get(url, function(data) {
             tableBodyStudents.empty();
+
             data.forEach(student => {
                 const row = `
                     <tr data-id="${student.student_id}">
@@ -25,21 +32,34 @@ $(document).ready(function () {
         }, 'json');
     }
 
+    // --- Обработчик ввода в поле поиска ---
+    $('#student-search-input').on('input', function () {
+        const query = $(this).val().trim();
+        loadStudents(query);
+    });
+
+    // --- Загрузка при открытии страницы ---
     if ($('#students-table').length > 0) {
         loadStudents();
     }
 
+    // --- Добавление студента ---
     $('#add-student-form').on('submit', function (e) {
         e.preventDefault();
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
-        formData.forEach(field => data[field.name] = field.value);
+
+        formData.forEach(field => {
+            data[field.name] = field.value;
+        });
+
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(data), function () {
             $('#add-student-form')[0].reset();
             loadStudents();
         });
     });
 
+    // --- Сохранение изменений ---
     $(document).on('click', '.save-btn-students', function () {
         const row = $(this).closest('tr');
         const id = row.data('id');
@@ -59,9 +79,11 @@ $(document).ready(function () {
         });
     });
 
+    // --- Удаление студента ---
     $(document).on('click', '.delete-btn-students', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', student_id: id };
+
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(data), function () {
             loadStudents();
         });

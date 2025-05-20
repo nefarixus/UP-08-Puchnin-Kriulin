@@ -4,12 +4,29 @@
 
     header("Content-Type: application/json");
 
+    // --- Поддержка GET и SEARCH ---
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $items = Student::Get();
+
+        // Если есть параметр ?search
+        if (isset($_GET['search']) && !empty($_GET['search'])) {
+            $search = mysqli_real_escape_string($db_connection, $_GET['search']);
+            $query = "SELECT * FROM Students WHERE 
+                last_name LIKE '%$search%' OR 
+                first_name LIKE '%$search%' OR 
+                group_id LIKE '%$search%'";
+            $result = mysqli_query($db_connection, $query);
+            $items = [];
+            while ($row = mysqli_fetch_assoc($result)) {
+                $items[] = new Student((object)$row);
+            }
+        }
+
         echo json_encode($items);
         exit();
     }
 
+    // --- POST: create / update / delete ---
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
 

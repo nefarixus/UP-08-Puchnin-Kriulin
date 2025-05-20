@@ -3,6 +3,7 @@
 <main>
     <h1>Студенты</h1>
 
+    <!-- Форма добавления -->
     <h2 style="margin-top: 15px;">Добавить студента</h2>
     <form id="add-student-form" class="add_form">
         <input type="text" name="last_name" placeholder="Фамилия"><br>
@@ -13,6 +14,13 @@
         <button type="submit" class="add-students-btn">Добавить</button>
     </form>
 
+    <!-- Строка поиска -->
+    <h2 style="margin-top: 15px;">Поиск студента</h2>
+    <div class="search-bar">
+        <input style="width: 280px;" type="text" id="student-search-input" placeholder="Поиск по фамилии, имени или ID группы">
+    </div>
+
+    <!-- Таблица студентов -->
     <h2 style="margin-top: 15px;">Список студентов</h2>
     <table id="students-table">
         <thead>
