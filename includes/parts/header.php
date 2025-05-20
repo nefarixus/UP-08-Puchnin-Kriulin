@@ -15,7 +15,7 @@
         </div>
         <nav class="right_header">
             <a class="h2" href="/UP-08-Puchnin-Kriulin/pages/students.php">Студенты</a>
-            <a class="h2" href="/UP-08-Puchnin-Kriulin/pages/groups.php">Группы</a>
+            <a class="h2" href="/UP-08-Puchnin-Kriulin/pages/student_groups.php">Группы</a>
             <a class="h2" href="/UP-08-Puchnin-Kriulin/pages/consultation.php">Консультации</a>
             <a class="h2" href="#">Выйти</a>
         </nav>

@@ -1,0 +1,84 @@
+$(document).ready(function () {
+    const tableBody = $('#students-table tbody');
+
+    function loadStudents() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', function (data) {
+            tableBody.empty();
+
+            data.forEach(student => {
+                const row = `
+                    <tr data-id="${student.student_id}">
+                        <td>${student.student_id}</td>
+                        <td contenteditable="true" class="edit-last-name">${student.last_name}</td>
+                        <td contenteditable="true" class="edit-first-name">${student.first_name}</td>
+                        <td contenteditable="true" class="edit-middle-name">${student.middle_name || ''}</td>
+                        <td contenteditable="true" class="edit-group-id">${student.group_id || ''}</td>
+                        <td contenteditable="true" class="edit-dismissal-date">${student.dismissal_date || ''}</td>
+                        <td>
+                            <button class="save-btn edit-students-btn">Сохранить</button>
+                            <button class="delete-btn delete-students-btn">Удалить</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.append(row);
+            });
+        }, 'json');
+    }
+
+    // Загрузка при открытии страницы
+    loadStudents();
+
+    // Добавление студента
+    $('#add-student-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+
+        const data = {
+            action: 'create'
+        };
+
+        formData.forEach(field => {
+            data[field.name] = field.value;
+        });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(data), function () {
+            $('#add-student-form')[0].reset();
+            loadStudents();
+        });
+    });
+
+    // Сохранение изменений при нажатии на "Сохранить"
+    $(document).on('click', '.save-btn', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const student = {
+            action: 'update',
+            student_id: id,
+            last_name: row.find('.edit-last-name').text(),
+            first_name: row.find('.edit-first-name').text(),
+            middle_name: row.find('.edit-middle-name').text() || null,
+            group_id: row.find('.edit-group-id').text() || null,
+            dismissal_date: row.find('.edit-dismissal-date').text() || null
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(student), function () {
+            loadStudents();
+        });
+    });
+
+    // Удаление студента
+    $(document).on('click', '.delete-btn', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const data = {
+            action: 'delete',
+            student_id: id
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(data), function () {
+            loadStudents();
+        });
+    });
+});
