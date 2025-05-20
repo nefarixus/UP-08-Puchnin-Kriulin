@@ -156,5 +156,72 @@ $(document).ready(function () {
         });
     });
 
+    const tableBodyAbsences = $('#absences-table tbody');
 
+    function loadAbsences() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', function (data) {
+            tableBodyAbsences.empty();
+
+            data.forEach(absence => {
+                const row = `
+                    <tr data-id="${absence.absence_id}">
+                        <td>${absence.absence_id}</td>
+                        <td contenteditable="true" class="edit-lesson-id">${absence.lesson_id}</td>
+                        <td contenteditable="true" class="edit-student-id">${absence.student_id}</td>
+                        <td contenteditable="true" class="edit-minutes-missed">${absence.minutes_missed}</td>
+                        <td contenteditable="true" class="edit-explanatory-note-path">${absence.explanatory_note_path || ''}</td>
+                        <td>
+                            <button class="save-btn edit-students-btn">Сохранить</button>
+                            <button class="delete-btn delete-students-btn">Удалить</button>
+                        </td>
+                    </tr>`;
+                tableBodyAbsences.append(row);
+            });
+        }, 'json');
+    }
+
+    // Автозагрузка
+    if ($('#absences-table').length > 0) {
+        loadAbsences();
+    }
+
+    // Добавление
+    $('#add-absence-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+        const data = { action: 'create' };
+        formData.forEach(field => data[field.name] = field.value);
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(data), function () {
+            $('#add-absence-form')[0].reset();
+            loadAbsences();
+        });
+    });
+
+    // Обновление
+    $(document).on('click', '.save-btn', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const absence = {
+            action: 'update',
+            absence_id: id,
+            lesson_id: row.find('.edit-lesson-id').text(),
+            student_id: row.find('.edit-student-id').text(),
+            minutes_missed: row.find('.edit-minutes-missed').text(),
+            explanatory_note_path: row.find('.edit-explanatory-note-path').text() || null
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(absence), function () {
+            loadAbsences();
+        });
+    });
+
+    // Удаление
+    $(document).on('click', '.delete-btn', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', absence_id: id };
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(data), function () {
+            loadAbsences();
+        });
+    });
 });

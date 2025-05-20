@@ -1,11 +1,11 @@
 <?php
     require_once "../../includes/parts/connection.php";
-    require_once "../../models/Discipline.php";
+    require_once "../../models/Absence.php";
 
     header("Content-Type: application/json");
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        echo json_encode(Discipline::Get());
+        echo json_encode(Absence::Get());
         exit();
     }
 
@@ -15,7 +15,7 @@
         if (isset($data['action'])) {
             switch ($data['action']) {
                 case 'create':
-                    $item = new Discipline();
+                    $item = new Absence();
                     foreach ($data as $key => $value) {
                         if (property_exists($item, $key)) {
                             $item->{$key} = $value;
@@ -26,8 +26,8 @@
                     break;
 
                 case 'update':
-                    $item = new Discipline();
-                    $item->discipline_id = $data['discipline_id'];
+                    $item = new Absence();
+                    $item->absence_id = $data['absence_id'];
                     foreach ($data as $key => $value) {
                         if (property_exists($item, $key)) {
                             $item->{$key} = $value;
@@ -38,8 +38,8 @@
                     break;
 
                 case 'delete':
-                    $item = new Discipline();
-                    $item->discipline_id = $data['discipline_id'];
+                    $item = new Absence();
+                    $item->absence_id = $data['absence_id'];
                     $item->Delete();
                     echo json_encode(['status' => 'success']);
                     break;
