@@ -10,7 +10,7 @@
         <input type="text" name="middle_name" placeholder="Отчество"><br>
         <input type="text" name="login" placeholder="Логин"><br>
         <input type="text" name="password" placeholder="Пароль"><br>
-        <button type="submit" class="add-teachers-btn">Добавить</button>
+        <button type="submit" class="add-students-btn">Добавить</button>
     </form>
 
     <h2 style="margin-top: 15px;">Список преподавателей</h2>

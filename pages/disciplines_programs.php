@@ -9,7 +9,7 @@
         <input type="text" name="topic" placeholder="Тема"><br>
         <input type="text" name="lesson_type" placeholder="Тип занятия"><br>
         <input type="number" name="hours" placeholder="Часов"><br>
-        <button type="submit" class="add-program-btn">Добавить</button>
+        <button type="submit" class="add-students-btn">Добавить</button>
     </form>
 
     <h2 style="margin-top: 15px;">Список программ</h2>

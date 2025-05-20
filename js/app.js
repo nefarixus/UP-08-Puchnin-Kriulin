@@ -237,8 +237,8 @@ $(document).ready(function () {
                         <td>${group.group_id}</td>
                         <td contenteditable="true" class="edit-group-name">${group.group_name}</td>
                         <td>
-                            <button class="save-btn edit-group-btn">Сохранить</button>
-                            <button class="delete-btn delete-group-btn">Удалить</button>
+                            <button class="save-btn edit-students-btn">Сохранить</button>
+                            <button class="delete-btn delete-students-btn">Удалить</button>
                         </td>
                     </tr>`;
                 tableBodyGroups.append(row);
@@ -299,8 +299,8 @@ $(document).ready(function () {
                         <td contenteditable="true" class="edit-lesson-type">${program.lesson_type}</td>
                         <td contenteditable="true" class="edit-hours">${program.hours}</td>
                         <td>
-                            <button class="save-btn edit-program-btn">Сохранить</button>
-                            <button class="delete-btn delete-program-btn">Удалить</button>
+                            <button class="save-btn edit-students-btn">Сохранить</button>
+                            <button class="delete-btn delete-students-btn">Удалить</button>
                         </td>
                     </tr>`;
                 tableBodyPrograms.append(row);
@@ -369,8 +369,8 @@ $(document).ready(function () {
                         <td contenteditable="true" class="edit-login">${teacher.login}</td>
                         <td contenteditable="true" class="edit-password">${teacher.password}</td>
                         <td>
-                            <button class="save-btn edit-teachers-btn">Сохранить</button>
-                            <button class="delete-btn delete-teachers-btn">Удалить</button>
+                            <button class="save-btn edit-students-btn">Сохранить</button>
+                            <button class="delete-btn delete-students-btn">Удалить</button>
                         </td>
                     </tr>`;
                 tableBodyTeachers.append(row);
