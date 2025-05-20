@@ -181,7 +181,7 @@ button {
     border: 1px solid #0CAC0C;
     background: #0CAC0C;
 }
-.edit-students-btn {
+.save-btn-students, .save-btn-disciplines, .save-btn-absences, .save-btn-groups, .save-btn-programs, .save-btn-teachers {
     border: 1px solid #0060AC;
     background: white;
     padding: 10px;
@@ -189,12 +189,12 @@ button {
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
-.edit-students-btn:hover {
+.save-btn-students:hover, .save-btn-disciplines:hover, .save-btn-absences:hover, .save-btn-groups:hover, .save-btn-programs:hover, .save-btn-teachers:hover {
     color: white;
     border: 1px solid #0060AC;
     background: #0060AC;
 }
-.delete-students-btn{
+.delete-btn-students, .delete-btn-disciplines, .delete-btn-absences, .delete-btn-groups, .delete-btn-programs, .delete-btn-teachers {
     border: 1px solid #E41613;
     background: white;
     padding: 10px;
@@ -202,7 +202,7 @@ button {
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
-.delete-students-btn:hover {
+.delete-btn-students:hover, .delete-btn-disciplines:hover, .delete-btn-absences:hover, .delete-btn-groups:hover, .delete-btn-programs:hover, .delete-btn-teachers:hover {
     color: white;
     border: 1px solid #E41613;
     background: #E41613;
