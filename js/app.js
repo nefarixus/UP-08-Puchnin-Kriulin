@@ -377,3 +377,287 @@ $(document).ready(function () {
         });
     });
 });
+
+
+/*Grade */
+
+$(document).ready(function () {
+    const tableBodyGrades = $('#grades-table tbody');
+
+    function loadGrades() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', function (data) {
+            tableBodyGrades.empty();
+            data.forEach(grade => {
+                const row = `
+                    <tr data-id="${grade.grade_id}">
+                        <td>${grade.grade_id}</td>
+                        <td contenteditable="true" class="edit-lesson-id">${grade.lesson_id}</td>
+                        <td contenteditable="true" class="edit-student-id">${grade.student_id}</td>
+                        <td contenteditable="true" class="edit-grade-value">${grade.grade_value}</td>
+                        <td>
+                            <button class="save-btn save-btn-grades">Сохранить</button>
+                            <button class="delete-btn delete-btn-grades">Удалить</button>
+                        </td>
+                    </tr>`;
+                tableBodyGrades.append(row);
+            });
+        }, 'json');
+    }
+
+    if ($('#grades-table').length > 0) {
+        loadGrades();
+    }
+
+    $('#add-grade-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+        const data = { action: 'create' };
+        formData.forEach(field => data[field.name] = field.value);
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(data), function () {
+            $('#add-grade-form')[0].reset();
+            loadGrades();
+        });
+    });
+
+    $(document).on('click', '.save-btn-grades', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const grade = {
+            action: 'update',
+            grade_id: id,
+            lesson_id: row.find('.edit-lesson-id').text(),
+            student_id: row.find('.edit-student-id').text(),
+            grade_value: row.find('.edit-grade-value').text()
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(grade), function () {
+            loadGrades();
+        });
+    });
+
+    $(document).on('click', '.delete-btn-grades', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', grade_id: id };
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(data), function () {
+            loadGrades();
+        });
+    });
+});
+
+/* consultation */
+$(document).ready(function () {
+    const tableBody = $('#consultations-table tbody');
+
+    function loadConsultations() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', function (data) {
+            tableBody.empty();
+            data.forEach(item => {
+                const row = `
+                    <tr data-id="${item.consultation_id}">
+                        <td>${item.consultation_id}</td>
+                        <td contenteditable="true" class="edit-teacher-id">${item.teacher_id}</td>
+                        <td contenteditable="true" class="edit-group-id">${item.group_id}</td>
+                        <td contenteditable="true" class="edit-student-id">${item.student_id || ''}</td>
+                        <td contenteditable="true" class="edit-date">${item.consultation_date}</td>
+                        <td contenteditable="true" class="edit-is-present">${item.is_present}</td>
+                        <td contenteditable="true" class="edit-is-completed">${item.is_completed}</td>
+                        <td>
+                            <button class="save-btn save-btn-consultation">Сохранить</button>
+                            <button class="delete-btn delete-btn-consultation">Удалить</button>
+                        </td>
+                    </tr>`;
+                tableBody.append(row);
+            });
+        }, 'json');
+    }
+
+    if ($('#consultations-table').length > 0) {
+        loadConsultations();
+    }
+
+    $('#add-consultation-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+        const data = { action: 'create' };
+        formData.forEach(field => data[field.name] = field.value);
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(data), function () {
+            $('#add-consultation-form')[0].reset();
+            loadConsultations();
+        });
+    });
+
+    $(document).on('click', '.save-btn-consultation', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const item = {
+            action: 'update',
+            consultation_id: id,
+            teacher_id: row.find('.edit-teacher-id').text(),
+            group_id: row.find('.edit-group-id').text(),
+            student_id: row.find('.edit-student-id').text(),
+            consultation_date: row.find('.edit-date').text(),
+            is_present: row.find('.edit-is-present').text(),
+            is_completed: row.find('.edit-is-completed').text()
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(item), function () {
+            loadConsultations();
+        });
+    });
+
+    $(document).on('click', '.delete-btn-consultation', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', consultation_id: id };
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(data), function () {
+            loadConsultations();
+        });
+    });
+});
+
+/* workload */
+
+$(document).ready(function () {
+    const tableBody = $('#workload-table tbody');
+
+    function loadWorkloads() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', function (data) {
+            tableBody.empty();
+            data.forEach(item => {
+                const row = `
+                    <tr data-id="${item.workload_id}">
+                        <td>${item.workload_id}</td>
+                        <td contenteditable="true" class="edit-teacher-id">${item.teacher_id}</td>
+                        <td contenteditable="true" class="edit-discipline-id">${item.discipline_id}</td>
+                        <td contenteditable="true" class="edit-group-id">${item.group_id}</td>
+                        <td contenteditable="true" class="edit-lecture-hours">${item.lecture_hours}</td>
+                        <td contenteditable="true" class="edit-practice-hours">${item.practice_hours}</td>
+                        <td contenteditable="true" class="edit-consultation-hours">${item.consultation_hours}</td>
+                        <td contenteditable="true" class="edit-course-project-hours">${item.course_project_hours}</td>
+                        <td contenteditable="true" class="edit-exam-hours">${item.exam_hours}</td>
+                        <td>
+                            <button class="save-btn save-btn-workload">Сохранить</button>
+                            <button class="delete-btn delete-btn-workload">Удалить</button>
+                        </td>
+                    </tr>`;
+                tableBody.append(row);
+            });
+        }, 'json');
+    }
+
+    if ($('#workload-table').length > 0) {
+        loadWorkloads();
+    }
+
+    $('#add-workload-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+        const data = { action: 'create' };
+        formData.forEach(field => data[field.name] = field.value);
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data), function () {
+            $('#add-workload-form')[0].reset();
+            loadWorkloads();
+        });
+    });
+
+    $(document).on('click', '.save-btn-workload', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const item = {
+            action: 'update',
+            workload_id: id,
+            teacher_id: row.find('.edit-teacher-id').text(),
+            discipline_id: row.find('.edit-discipline-id').text(),
+            group_id: row.find('.edit-group-id').text(),
+            lecture_hours: row.find('.edit-lecture-hours').text(),
+            practice_hours: row.find('.edit-practice-hours').text(),
+            consultation_hours: row.find('.edit-consultation-hours').text(),
+            course_project_hours: row.find('.edit-course-project-hours').text(),
+            exam_hours: row.find('.edit-exam-hours').text()
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(item), function () {
+            loadWorkloads();
+        });
+    });
+
+    $(document).on('click', '.delete-btn-workload', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', workload_id: id };
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data), function () {
+            loadWorkloads();
+        });
+    });
+});
+
+/* lesson */
+
+$(document).ready(function () {
+    const tableBody = $('#lessons-table tbody');
+
+    function loadLessons() {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', function (data) {
+            tableBody.empty();
+            data.forEach(item => {
+                const row = `
+                    <tr data-id="${item.lesson_id}">
+                        <td>${item.lesson_id}</td>
+                        <td contenteditable="true" class="edit-program-id">${item.program_id}</td>
+                        <td contenteditable="true" class="edit-group-id">${item.group_id}</td>
+                        <td contenteditable="true" class="edit-teacher-id">${item.teacher_id}</td>
+                        <td contenteditable="true" class="edit-lesson-date">${item.lesson_date}</td>
+                        <td contenteditable="true" class="edit-duration-minutes">${item.duration_minutes}</td>
+                        <td>
+                            <button class="save-btn save-btn-lesson">Сохранить</button>
+                            <button class="delete-btn delete-btn-lesson">Удалить</button>
+                        </td>
+                    </tr>`;
+                tableBody.append(row);
+            });
+        }, 'json');
+    }
+
+    if ($('#lessons-table').length > 0) {
+        loadLessons();
+    }
+
+    $('#add-lesson-form').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serializeArray();
+        const data = { action: 'create' };
+        formData.forEach(field => data[field.name] = field.value);
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(data), function () {
+            $('#add-lesson-form')[0].reset();
+            loadLessons();
+        });
+    });
+
+    $(document).on('click', '.save-btn-lesson', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
+
+        const item = {
+            action: 'update',
+            lesson_id: id,
+            program_id: row.find('.edit-program-id').text(),
+            group_id: row.find('.edit-group-id').text(),
+            teacher_id: row.find('.edit-teacher-id').text(),
+            lesson_date: row.find('.edit-lesson-date').text(),
+            duration_minutes: row.find('.edit-duration-minutes').text()
+        };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(item), function () {
+            loadLessons();
+        });
+    });
+
+    $(document).on('click', '.delete-btn-lesson', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', lesson_id: id };
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(data), function () {
+            loadLessons();
+        });
+    });
+});

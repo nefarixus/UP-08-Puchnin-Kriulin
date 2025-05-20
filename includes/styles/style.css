@@ -168,7 +168,7 @@ button {
     text-align: center;
     width: 100px;
 }
-.add-students-btn, .add-disciplines-btn, .add-absences-btn, .add-groups-btn, .add-programs-btn, .add-teachers-btn {
+.add-students-btn, .add-disciplines-btn, .add-absences-btn, .add-groups-btn, .add-programs-btn, .add-teachers-btn{
     border: 1px solid #0060AC;
     background: white;
     padding: 10px;
@@ -181,7 +181,7 @@ button {
     border: 1px solid #0CAC0C;
     background: #0CAC0C;
 }
-.save-btn-students, .save-btn-disciplines, .save-btn-absences, .save-btn-groups, .save-btn-programs, .save-btn-teachers {
+.save-btn-students, .save-btn-disciplines, .save-btn-absences, .save-btn-groups, .save-btn-programs, .save-btn-teachers, .save-btn-grades, .save-btn-consultation,.save-btn-workload,.save-btn-lesson{
     border: 1px solid #0060AC;
     background: white;
     padding: 10px;
@@ -189,12 +189,12 @@ button {
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
-.save-btn-students:hover, .save-btn-disciplines:hover, .save-btn-absences:hover, .save-btn-groups:hover, .save-btn-programs:hover, .save-btn-teachers:hover {
+.save-btn-students:hover, .save-btn-disciplines:hover, .save-btn-absences:hover, .save-btn-groups:hover, .save-btn-programs:hover, .save-btn-teachers:hover,.save-btn-grades:hover,.save-btn-consultation:hover,.save-btn-workload:hover,.save-btn-lesson:hover{
     color: white;
     border: 1px solid #0060AC;
     background: #0060AC;
 }
-.delete-btn-students, .delete-btn-disciplines, .delete-btn-absences, .delete-btn-groups, .delete-btn-programs, .delete-btn-teachers {
+.delete-btn-students, .delete-btn-disciplines, .delete-btn-absences, .delete-btn-groups, .delete-btn-programs, .delete-btn-teachers, .delete-btn-grades,.delete-btn-consultation,.delete-btn-workload,.delete-btn-lesson{
     border: 1px solid #E41613;
     background: white;
     padding: 10px;
@@ -202,7 +202,7 @@ button {
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
-.delete-btn-students:hover, .delete-btn-disciplines:hover, .delete-btn-absences:hover, .delete-btn-groups:hover, .delete-btn-programs:hover, .delete-btn-teachers:hover {
+.delete-btn-students:hover, .delete-btn-disciplines:hover, .delete-btn-absences:hover, .delete-btn-groups:hover, .delete-btn-programs:hover, .delete-btn-teachers:hover, .delete-btn-grades:hover,.save-btn-consultation:hover,.delete-btn-workload:hover,.delete-btn-lesson:hover{
     color: white;
     border: 1px solid #E41613;
     background: #E41613;

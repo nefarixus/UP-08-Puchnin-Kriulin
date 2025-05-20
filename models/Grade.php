@@ -23,7 +23,7 @@
             $items = [];
             $result = mysqli_query($db_connection, "SELECT * FROM Grades");
             while ($row = mysqli_fetch_assoc($result)) {
-                $items[] = new Grade((object)$row);
+                $items[] = new Grade($row);
             }
             return $items;
         }
