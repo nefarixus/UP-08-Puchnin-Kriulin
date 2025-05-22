@@ -14,10 +14,23 @@
         <button type="submit" class="add-students-btn">Добавить</button>
     </form>
 
-    <!-- Строка поиска -->
-    <h2 style="margin-top: 15px;">Поиск студента</h2>
-    <div class="search-bar">
-        <input style="width: 280px;" type="text" id="student-search-input" placeholder="Поиск по фамилии, имени или ID группы">
+    <!-- Поиск и фильтры -->
+     
+    <h2 style="margin-top: 15px;">Поиск и фильтрация</h2>
+    <div class="search-sort">
+        <input type="text" id="student-search-input" placeholder="Поиск по ФИО">
+
+        <select id="sort-group-select">
+            <option value="">Все группы</option>
+        </select>
+
+        <select id="sort-dismissal-select">
+            <option value="">Все</option>
+            <option value="not_null">Только отчисленные</option>
+            <option value="null">Не отчисленные</option>
+        </select>
+
+        <button id="reset-student-filters">Сбросить</button>
     </div>
 
     <!-- Таблица студентов -->
@@ -29,7 +42,7 @@
                 <th>Фамилия</th>
                 <th>Имя</th>
                 <th>Отчество</th>
-                <th>Группа ID</th>
+                <th>Группа</th>
                 <th>Дата отчисления</th>
                 <th>Действия</th>
             </tr>

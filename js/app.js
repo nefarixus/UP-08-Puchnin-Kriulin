@@ -1,46 +1,79 @@
 $(document).ready(function () {
     
-    // --- STUDENTS ---
+   // --- STUDENTS ---
     const tableBodyStudents = $('#students-table tbody');
+    const studentSearchInput = $('#student-search-input');
+    const sortGroupSelect = $('#sort-group-select');
+    const sortDismissalSelect = $('#sort-dismissal-select');
 
-    function loadStudents(searchQuery = '') {
+    let currentSearch = '';
+    let currentGroupFilter = '';
+    let currentDismissalFilter = '';
+
+    function loadStudents() {
         let url = '/UP-08-Puchnin-Kriulin/controllers/api/student_api.php';
+        let params = {};
 
-        if (searchQuery) {
-            url += '?search=' + encodeURIComponent(searchQuery);
-        }
+        if (currentSearch) params.search = currentSearch;
+        if (currentGroupFilter) params.group_id = currentGroupFilter;
+        if (currentDismissalFilter) params.dismissal = currentDismissalFilter;
 
-        $.get(url, function(data) {
-            tableBodyStudents.empty();
-
-            data.forEach(student => {
-                const row = `
-                    <tr data-id="${student.student_id}">
-                        <td>${student.student_id}</td>
-                        <td contenteditable="true" class="edit-last-name">${student.last_name}</td>
-                        <td contenteditable="true" class="edit-first-name">${student.first_name}</td>
-                        <td contenteditable="true" class="edit-middle-name">${student.middle_name || ''}</td>
-                        <td contenteditable="true" class="edit-group-id">${student.group_id || ''}</td>
-                        <td contenteditable="true" class="edit-dismissal-date">${student.dismissal_date || ''}</td>
-                        <td>
-                            <button class="save-btn save-btn-students">Сохранить</button>
-                            <button class="delete-btn delete-btn-students">Удалить</button>
-                        </td>
-                    </tr>`;
-                tableBodyStudents.append(row);
-            });
+        $.get(url, params, function(data) {
+            renderStudents(data);
         }, 'json');
     }
 
-    // --- Обработчик ввода в поле поиска ---
-    $('#student-search-input').on('input', function () {
-        const query = $(this).val().trim();
-        loadStudents(query);
-    });
+    function renderStudents(data) {
+        tableBodyStudents.empty();
 
-    // --- Загрузка при открытии страницы ---
+        data.forEach(student => {
+            const row = `
+                <tr data-id="${student.student_id}">
+                    <td>${student.student_id}</td>
+                    <td contenteditable="true" class="edit-last-name">${student.last_name}</td>
+                    <td contenteditable="true" class="edit-first-name">${student.first_name}</td>
+                    <td contenteditable="true" class="edit-middle-name">${student.middle_name || ''}</td>
+                    <td contenteditable="true" class="edit-group-id" data-group-id="${student.group_id}">
+                        ${student.group_name || '—'}
+                    </td>
+                    <td contenteditable="true" class="edit-dismissal-date">${student.dismissal_date || ''}</td>
+                    <td>
+                        <button class="save-btn save-btn-students">Сохранить</button>
+                        <button class="delete-btn delete-btn-students">Удалить</button>
+                    </td>
+                </tr>`;
+            tableBodyStudents.append(row);
+        });
+    }
+
+    // --- Поиск по ФИО ---
+    if (studentSearchInput.length > 0) {
+        studentSearchInput.on('input', function () {
+            currentSearch = $(this).val().trim();
+            loadStudents();
+        });
+    }
+
+    // --- Сортировка по группе ---
+    if (sortGroupSelect.length > 0) {
+        sortGroupSelect.on('change', function () {
+            currentGroupFilter = $(this).val().trim();
+            loadStudents();
+        });
+    }
+
+    // --- Сортировка по дате отчисления ---
+    if (sortDismissalSelect.length > 0) {
+        sortDismissalSelect.on('change', function () {
+            currentDismissalFilter = $(this).val().trim();
+            loadStudents();
+        });
+    }
+
+    // --- Загрузка при старте ---
     if ($('#students-table').length > 0) {
         loadStudents();
+        loadStudentGroups();
     }
 
     // --- Добавление студента ---
@@ -53,10 +86,19 @@ $(document).ready(function () {
             data[field.name] = field.value;
         });
 
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(data), function () {
-            $('#add-student-form')[0].reset();
-            loadStudents();
-        });
+        // Если дата пустая — отправляем null
+        if (data.dismissal_date === '') {
+            data.dismissal_date = null;
+        }
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(data))
+            .done(function () {
+                $('#add-student-form')[0].reset();
+                loadStudents();
+            })
+            .fail(function (xhr) {
+                alert(xhr.responseJSON.errors.join('\n'));
+            });
     });
 
     // --- Сохранение изменений ---
@@ -70,13 +112,25 @@ $(document).ready(function () {
             last_name: row.find('.edit-last-name').text(),
             first_name: row.find('.edit-first-name').text(),
             middle_name: row.find('.edit-middle-name').text() || null,
-            group_id: row.find('.edit-group-id').text() || null,
+            group_id: row.find('.edit-group-id').data('group-id'),
             dismissal_date: row.find('.edit-dismissal-date').text() || null
         };
 
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(student), function () {
-            loadStudents();
-        });
+        // Пользователь может попытаться ввести новое значение group_id
+        const newGroupIdText = row.find('.edit-group-id').text().trim();
+        const newGroupId = parseInt(newGroupIdText);
+
+        if (!isNaN(newGroupId)) {
+            student.group_id = newGroupId;
+        }
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(student))
+            .done(function () {
+                loadStudents();
+            })
+            .fail(function (xhr) {
+                alert(xhr.responseJSON.errors.join('\n'));
+            });
     });
 
     // --- Удаление студента ---
@@ -84,10 +138,41 @@ $(document).ready(function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', student_id: id };
 
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(data), function () {
-            loadStudents();
-        });
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php', JSON.stringify(data))
+            .done(function () {
+                loadStudents();
+            })
+            .fail(function (xhr) {
+                alert(xhr.responseJSON.message);
+            });
     });
+
+    // --- Сброс фильтров ---
+    $('#reset-student-filters').on('click', function () {
+        currentSearch = '';
+        currentGroupFilter = '';
+        currentDismissalFilter = '';
+        studentSearchInput.val('');
+        sortGroupSelect.val('');
+        sortDismissalSelect.val('');
+        loadStudents();
+    });
+
+    // --- Загрузка групп для фильтрации ---
+    function loadStudentGroups() {
+        const groupSelect = $('#sort-group-select');
+        if (groupSelect.length === 0) return;
+
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function(data) {
+            groupSelect.empty().append('<option value="">Все группы</option>');
+
+            data.forEach(group => {
+                groupSelect.append(`<option value="${group.group_id}">${group.group_name}</option>`);
+            });
+        }, 'json');
+    }
+
+
 
 
     // --- DISCIPLINES ---
