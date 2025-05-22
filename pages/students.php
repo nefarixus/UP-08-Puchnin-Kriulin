@@ -18,19 +18,19 @@
      
     <h2 style="margin-top: 15px;">Поиск и фильтрация</h2>
     <div class="search-sort">
-        <input type="text" id="student-search-input" placeholder="Поиск по ФИО">
+        <input type="text" class="student-search-input" id="student-search-input" placeholder="Поиск по ФИО">
 
-        <select id="sort-group-select">
+        <select class="sort-group-select" id="sort-group-select">
             <option value="">Все группы</option>
         </select>
 
-        <select id="sort-dismissal-select">
+        <select class="sort-dismissal-select" id="sort-dismissal-select">
             <option value="">Все</option>
             <option value="not_null">Только отчисленные</option>
             <option value="null">Не отчисленные</option>
         </select>
 
-        <button id="reset-student-filters">Сбросить</button>
+        <button class="reset-student-filters" id="reset-student-filters">Сбросить</button>
     </div>
 
     <!-- Таблица студентов -->

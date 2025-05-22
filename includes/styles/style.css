@@ -119,7 +119,7 @@ main form
 input[type="text"],
 input[type="number"], 
 input[type="date"],
-input[type="datetime-local"] {
+input[type="datetime-local"], .sort-group-select, .sort-dismissal-select, .student-search-input {
     background-color: white;
     border: 1px solid #0060AC;
     padding: 10px;
@@ -203,7 +203,7 @@ button {
     border: 1px solid #0060AC;
     background: #0060AC;
 }
-.delete-btn-students, .delete-btn-disciplines, .delete-btn-absences, .delete-btn-groups, .delete-btn-programs, .delete-btn-teachers, .delete-btn-grades, .delete-btn-consultation, .delete-btn-workload, .delete-btn-lesson, .reset-btn-search {
+.delete-btn-students, .delete-btn-disciplines, .delete-btn-absences, .delete-btn-groups, .delete-btn-programs, .delete-btn-teachers, .delete-btn-grades, .delete-btn-consultation, .delete-btn-workload, .delete-btn-lesson, .reset-student-filters {
     border: 1px solid #E41613;
     background: white;
     padding: 10px;
@@ -211,7 +211,7 @@ button {
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
-.delete-btn-students:hover, .delete-btn-disciplines:hover, .delete-btn-absences:hover, .delete-btn-groups:hover, .delete-btn-programs:hover, .delete-btn-teachers:hover, .delete-btn-grades:hover, .save-btn-consultation:hover, .delete-btn-workload:hover, .delete-btn-lesson:hover, .reset-btn-search:hover {
+.delete-btn-students:hover, .delete-btn-disciplines:hover, .delete-btn-absences:hover, .delete-btn-groups:hover, .delete-btn-programs:hover, .delete-btn-teachers:hover, .delete-btn-grades:hover, .save-btn-consultation:hover, .delete-btn-workload:hover, .delete-btn-lesson:hover, .reset-student-filters:hover {
     color: white;
     border: 1px solid #E41613;
     background: #E41613;
