@@ -1,3 +1,10 @@
+window.onerror = function(message, source, lineno, colno, error) {
+    $.post('/UP-08-Puchnin-Kriulin/controllers/api/log_error.php', {
+        message: message,
+        stack: error?.stack || ''
+    });
+    return false;
+};
 $(document).ready(function () {
     
    // --- STUDENTS ---

@@ -2,11 +2,15 @@
     require_once "../../includes/parts/connection.php";
     require_once "../../models/Absence.php";
 
+    require_once "../log_error.php";
+
     header("Content-Type: application/json");
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode(Absence::Get());
         exit();
+    } else {
+        logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -45,6 +49,8 @@
                     break;
             }
             exit();
+        } else {
+            logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
         }
     }
 ?>

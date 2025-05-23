@@ -1,4 +1,7 @@
 <?php
+    // Функция для логирования ошибок
+    require_once "../log_error.php";
+
     $db_server = "localhost";
     $db_username = "root";
     $db_password = "";

@@ -2,6 +2,8 @@
     require_once "../../includes/parts/connection.php";
     require_once "../../models/Discipline.php";
 
+    require_once "../log_error.php";
+
     header("Content-Type: application/json");
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -45,6 +47,8 @@
                     break;
             }
             exit();
+        } else {
+            logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
         }
     }
 ?>
