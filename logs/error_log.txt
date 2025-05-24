@@ -1,5 +1,4 @@
-[2025-05-24 22:08:23] Invalid request method: POST
-[2025-05-24 22:08:49] Invalid request method: POST
-[2025-05-24 22:10:05] Invalid request method: POST
-[2025-05-24 22:10:13] Invalid request method: POST
-[2025-05-24 22:10:17] Invalid request method: POST
+[2025-05-25 00:21:29] students.php: Фамилия должна содержать только буквы
+[2025-05-25 00:21:35] students.php: Имя должно содержать только буквы
+[2025-05-25 00:21:42] students.php: Отчество должно содержать только буквы
+[2025-05-25 00:21:47] students.php: Нельзя удалить студента — он связан с пропусками или оценками

@@ -306,59 +306,119 @@ $(document).ready(function () {
 
     // --- STUDENT GROUPS ---
     const tableBodyGroups = $('#groups-table tbody');
+        let currentGroupSearch = '';
 
-    function loadGroups() {
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function (data) {
-            tableBodyGroups.empty();
+        function loadGroups(filters = {}) {
+        let url = '/UP-08-Puchnin-Kriulin/controllers/api/group_api.php';
+
+        if (filters.search) {
+            url += `?search=${filters.search}`;
+        }
+
+        $.get(url, function(data) {
+            renderGroups(data);
+        }, 'json');
+    }
+
+    function renderGroups(data) {
+        tableBodyGroups.empty();
+        data.forEach(group => {
+            const row = `
+                <tr data-id="${group.group_id}">
+                    <td>${group.group_id}</td>
+                    <td contenteditable="true" class="edit-group-name">${group.group_name}</td>
+                    <td>
+                        <button class="save-btn save-btn-groups">Сохранить</button>
+                        <button class="delete-btn delete-btn-groups">Удалить</button>
+                    </td>
+                </tr>`;
+            tableBodyGroups.append(row);
+        });
+    }
+
+    // --- Выпадающий список и просмотр студентов по группе ---
+    function loadGroupOptions() {
+        const groupSelect = $('#group-select-for-students');
+        if (groupSelect.length === 0) return;
+
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function(data) {
+            groupSelect.empty().append('<option value="">Выберите группу</option>');
             data.forEach(group => {
+                groupSelect.append(`<option value="${group.group_id}">${group.group_name}</option>`);
+            });
+        }, 'json');
+    }
+
+    function loadStudentsByGroup(groupId) {
+        const tableBody = $('#group-students-table tbody');
+        tableBody.empty();
+
+        if (!groupId) {
+            tableBody.append('<tr><td colspan="4">Выберите группу</td></tr>');
+            return;
+        }
+
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/student_api.php?group_id=' + groupId, function(data) {
+            if (data.length === 0) {
+                tableBody.append('<tr><td colspan="4">В этой группе нет студентов</td></tr>');
+                return;
+            }
+
+            data.forEach(student => {
                 const row = `
-                    <tr data-id="${group.group_id}">
-                        <td>${group.group_id}</td>
-                        <td contenteditable="true" class="edit-group-name">${group.group_name}</td>
-                        <td>
-                            <button class="save-btn save-btn-groups">Сохранить</button>
-                            <button class="delete-btn delete-btn-groups">Удалить</button>
-                        </td>
+                    <tr>
+                        <td>${student.student_id}</td>
+                        <td>${student.last_name}</td>
+                        <td>${student.first_name}</td>
+                        <td>${student.middle_name || ''}</td>
                     </tr>`;
-                tableBodyGroups.append(row);
+                tableBody.append(row);
             });
         }, 'json');
     }
 
     if ($('#groups-table').length > 0) {
         loadGroups();
+        loadGroupOptions();
     }
 
+    $('#group-search-input').on('input', function () {
+        currentSearch = $(this).val().trim();
+        loadGroups({ search: currentSearch });
+    });
+
+    $('#reset-group-filters').on('click', function () {
+        $('#group-search-input').val('');
+        currentSearch = '';
+        loadGroups();
+    });
+
+    $('#group-select-for-students').on('change', function () {
+        const groupId = $(this).val();
+        loadStudentsByGroup(groupId);
+    });
     $('#add-group-form').on('submit', function (e) {
         e.preventDefault();
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
-        formData.forEach(field => data[field.name] = field.value);
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(data), function () {
-            $('#add-group-form')[0].reset();
-            loadGroups();
-        });
-    });
 
-    $(document).on('click', '.save-btn-groups', function () {
-        const row = $(this).closest('tr');
-        const id = row.data('id');
-        const group = {
-            action: 'update',
-            group_id: id,
-            group_name: row.find('.edit-group-name').text()
-        };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(group), function () {
-            loadGroups();
+        formData.forEach(field => {
+            data[field.name] = field.value;
         });
-    });
 
-    $(document).on('click', '.delete-btn-groups', function () {
-        const id = $(this).closest('tr').data('id');
-        const data = { action: 'delete', group_id: id };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(data), function () {
-            loadGroups();
-        });
+        // Если дата пустая — отправляем null
+        if (data.dismissal_date === '') {
+            data.dismissal_date = null;
+        }
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(data))
+            .done(function () {
+                $('#add-group-form')[0].reset();
+                loadGroups();
+            })
+            .fail(function (xhr) {
+                alert(xhr.responseJSON.errors.join('\n'));
+            });
     });
 
 

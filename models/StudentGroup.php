@@ -38,8 +38,33 @@
 
         public function Delete() {
             global $db_connection;
+
+            // Проверяем, есть ли студенты в этой группе
+            $studentsQuery = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Students WHERE group_id = $this->group_id");
+            $students = mysqli_fetch_assoc($studentsQuery)['count'];
+
+            // Проверяем, есть ли нагрузка у преподавателей на эту группу
+            $workloadQuery = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Teacher_Workload WHERE group_id = $this->group_id");
+            $workload = mysqli_fetch_assoc($workloadQuery)['count'];
+
+            if ($students > 0 || $workload > 0) {
+                return false;
+            }
+
             $query = "DELETE FROM StudentGroups WHERE group_id = $this->group_id";
             return mysqli_query($db_connection, $query);
+        }
+
+        public function validate() {
+            $errors = [];
+
+            if (empty($this->group_name)) {
+                $errors[] = 'Название группы обязательно';
+            } elseif (!preg_match("/^[а-яА-ЯёЁa-zA-Z0-9\- ]+$/u", $this->group_name)) {
+                $errors[] = 'Название группы должно содержать только буквы, цифры, пробелы или дефис';
+            }
+
+            return $errors;
         }
     }
 ?>

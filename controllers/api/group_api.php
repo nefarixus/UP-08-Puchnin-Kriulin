@@ -7,53 +7,106 @@
     header("Content-Type: application/json");
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        echo json_encode(StudentGroup::Get());
+        $query = "SELECT * FROM StudentGroups WHERE 1=1";
+        
+        if (!empty($_GET['search'])) {
+            $search = mysqli_real_escape_string($db_connection, $_GET['search']);
+            $query .= " AND group_name LIKE '%$search%'";
+        }
+
+        $result = mysqli_query($db_connection, $query);
+        $items = [];
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $items[] = new StudentGroup((object)$row);
+        }
+
+        echo json_encode($items);
         exit();
     } else {
-        logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
+        logError("Неверный метод запроса");
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require_once "log_error.php";
-        $data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true);
 
-        if (isset($data['action'])) {
-            switch ($data['action']) {
-                case 'create':
-                    $item = new StudentGroup();
-                    foreach ($data as $key => $value) {
-                        if (property_exists($item, $key)) {
-                            $item->{$key} = $value;
-                        }
+    if (isset($data['action'])) {
+        switch ($data['action']) {
+            case 'create':
+                $item = new StudentGroup();
+                foreach ($data as $key => $value) {
+                    if (property_exists($item, $key)) {
+                        $item->{$key} = $value;
                     }
-                    $item->Insert();
-                    echo json_encode(['status' => 'success']);
-                    break;
+                }
 
-                case 'update':
-                    $item = new StudentGroup();
-                    $item->group_id = $data['group_id'];
-                    foreach ($data as $key => $value) {
-                        if (property_exists($item, $key)) {
-                            $item->{$key} = $value;
-                        }
+                $errors = $item->validate();
+                if (!empty($errors)) {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'errors' => $errors]);
+                    exit();
+                }
+
+                if ($item->Insert()) {
+                    echo json_encode(['status' => 'success']);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['status' => 'error', 'message' => 'Ошибка при добавлении группы']);
+                    logError("student_groups.php: Ошибка при добавлении группы");
+                }
+                break;
+
+            case 'update':
+                $item = new StudentGroup();
+                $item->group_id = $data['group_id'];
+
+                foreach ($data as $key => $value) {
+                    if (property_exists($item, $key)) {
+                        $item->{$key} = $value;
                     }
-                    $item->Update();
-                    echo json_encode(['status' => 'success']);
-                    break;
+                }
 
-                case 'delete':
-                    $item = new StudentGroup();
-                    $item->group_id = $data['group_id'];
-                    $item->Delete();
+                $errors = $item->validate();
+                if (!empty($errors)) {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'errors' => $errors]);
+                    exit();
+                }
+
+                if ($item->Update()) {
                     echo json_encode(['status' => 'success']);
-                    break;
-            }
-            exit();
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['status' => 'error', 'message' => 'Ошибка при обновлении группы']);
+                    logError("student_groups.php: Ошибка при обновлении группы");
+                }
+                break;
+
+            case 'delete':
+                $item = new StudentGroup();
+                $item->group_id = $data['group_id'];
+
+                if ($item->Delete()) {
+                    echo json_encode(['status' => 'success']);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'message' => 'Нельзя удалить группу — она связана с другими таблицами']);
+                    logError("student_groups.php: Нельзя удалить группу — она связана с другими таблицами");
+                }
+                break;
+
+            default:
+                logError("Неизвестное действие: " . $data['action']);
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Неизвестное действие']);
+                logError("student_groups.php: Неизвестное действие");
+                exit();
         }
+        exit();
     }
-    logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Неверный метод запроса']);
-    exit();
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Поле "action" обязательно']);
+        logError('student_groups.php: Поле "action" обязательно');
+        exit();
+    }
 ?>
