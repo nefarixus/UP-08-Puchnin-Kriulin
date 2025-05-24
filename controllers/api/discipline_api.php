@@ -2,16 +2,19 @@
     require_once "../../includes/parts/connection.php";
     require_once "../../models/Discipline.php";
 
-    require_once "../log_error.php";
+    require_once "log_error.php";
 
     header("Content-Type: application/json");
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode(Discipline::Get());
         exit();
+    } else {
+        logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        require_once "log_error.php";
         $data = json_decode(file_get_contents('php://input'), true);
 
         if (isset($data['action'])) {
@@ -47,8 +50,10 @@
                     break;
             }
             exit();
-        } else {
-            logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
         }
     }
+    logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Неверный метод запроса']);
+    exit();
 ?>

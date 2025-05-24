@@ -79,7 +79,7 @@
             return mysqli_query($db_connection, $query);
         }
 
-        public function validate() {
+        public function Validate() {
             $errors = [];
 
             if (empty($this->last_name)) {
