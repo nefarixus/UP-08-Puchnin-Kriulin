@@ -23,8 +23,6 @@
 
         echo json_encode($items);
         exit();
-    } else {
-        logError("Неверный метод запроса");
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -85,13 +83,13 @@
             case 'delete':
                 $item = new StudentGroup();
                 $item->group_id = $data['group_id'];
-
+                
                 if ($item->Delete()) {
                     echo json_encode(['status' => 'success']);
                 } else {
                     http_response_code(400);
-                    echo json_encode(['status' => 'error', 'message' => 'Нельзя удалить группу — она связана с другими таблицами']);
-                    logError("student_groups.php: Нельзя удалить группу — она связана с другими таблицами");
+                    echo json_encode(['status' => 'error', 'message' => 'Невозможно удалить группу — она используется в других разделах']);
+                    logError("student_groups.php: попытка удалить группу — есть связи с другими таблицами");
                 }
                 break;
 

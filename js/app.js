@@ -397,6 +397,7 @@ $(document).ready(function () {
         const groupId = $(this).val();
         loadStudentsByGroup(groupId);
     });
+
     $('#add-group-form').on('submit', function (e) {
         e.preventDefault();
         const formData = $(this).serializeArray();
@@ -406,7 +407,6 @@ $(document).ready(function () {
             data[field.name] = field.value;
         });
 
-        // Если дата пустая — отправляем null
         if (data.dismissal_date === '') {
             data.dismissal_date = null;
         }
@@ -419,6 +419,21 @@ $(document).ready(function () {
             .fail(function (xhr) {
                 alert(xhr.responseJSON.errors.join('\n'));
             });
+    });
+
+    $(document).on('click', '.delete-btn-groups', function () {
+        const id = $(this).closest('tr').data('id');
+        const data = { action: 'delete', group_id: id };
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(data), function () {
+            loadGroups();
+        }).fail(function (xhr) {
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                alert(xhr.responseJSON.message);
+            } else {
+                alert('Ошибка при удалении группы');
+            }
+        });
     });
 
 
