@@ -658,16 +658,38 @@ $(document).ready(function () {
 $(document).ready(function () {
     const tableBodyGrades = $('#grades-table tbody');
 
+    // Функция для определения класса по оценке
+    function getColorClass(gradeValue) {
+        switch (parseInt(gradeValue)) {
+            case 5:
+                return 'green';
+            case 4:
+                return 'dark-yellow';
+            case 3:
+                return 'orange';
+            default:
+                return 'gray';
+        }
+    }
+
     function loadGrades() {
         $.get('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', function (data) {
             tableBodyGrades.empty();
+
+            if (!Array.isArray(data)) {
+                console.error("Неверный формат данных:", data);
+                return;
+            }
+
             data.forEach(grade => {
+                const gradeClass = getColorClass(grade.grade_value); 
+
                 const row = `
                     <tr data-id="${grade.grade_id}">
                         <td>${grade.grade_id}</td>
                         <td contenteditable="true" class="edit-lesson-id">${grade.lesson_id}</td>
                         <td contenteditable="true" class="edit-student-id">${grade.student_id}</td>
-                        <td contenteditable="true" class="edit-grade-value">${grade.grade_value}</td>
+                        <td contenteditable="true" class="edit-grade-value grade-cell ${gradeClass}">${grade.grade_value}</td>
                         <td>
                             <button class="save-btn save-btn-grades">Сохранить</button>
                             <button class="delete-btn delete-btn-grades">Удалить</button>
@@ -675,7 +697,9 @@ $(document).ready(function () {
                     </tr>`;
                 tableBodyGrades.append(row);
             });
-        }, 'json');
+        }, 'json').fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка загрузки оценок:", textStatus, errorThrown);
+        });
     }
 
     if ($('#grades-table').length > 0) {
@@ -685,11 +709,21 @@ $(document).ready(function () {
     $('#add-grade-form').on('submit', function (e) {
         e.preventDefault();
         const formData = $(this).serializeArray();
+        const gradeValue = formData.find(f => f.name === 'grade_value')?.value;
+
+        if (![3,4,5].includes(parseInt(gradeValue))) {
+            alert("Оценка должна быть 3, 4 или 5");
+            return;
+        }
+
         const data = { action: 'create' };
         formData.forEach(field => data[field.name] = field.value);
+
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(data), function () {
             $('#add-grade-form')[0].reset();
             loadGrades();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка добавления оценки:", textStatus, errorThrown);
         });
     });
 
@@ -697,24 +731,35 @@ $(document).ready(function () {
         const row = $(this).closest('tr');
         const id = row.data('id');
 
+        const newGradeValue = row.find('.edit-grade-value').text();
+        const cell = row.find('.edit-grade-value');
+
+        const newClass = getColorClass(newGradeValue);
+        cell.removeClass("green dark-yellow orange gray").addClass(newClass);
+
         const grade = {
             action: 'update',
             grade_id: id,
             lesson_id: row.find('.edit-lesson-id').text(),
             student_id: row.find('.edit-student-id').text(),
-            grade_value: row.find('.edit-grade-value').text()
+            grade_value: newGradeValue
         };
 
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(grade), function () {
-            loadGrades();
+            loadGrades(); 
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка обновления оценки:", textStatus, errorThrown);
         });
     });
 
     $(document).on('click', '.delete-btn-grades', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', grade_id: id };
+
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(data), function () {
             loadGrades();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка удаления оценки:", textStatus, errorThrown);
         });
     });
 });
