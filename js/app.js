@@ -240,7 +240,7 @@ function renderAbsences(data) {
                 <td>${absence.group_name || '—'}</td>
                 <td contenteditable="true" class="edit-minutes-missed">${absence.minutes_missed || ''}</td>
                 <td>
-                    ${absence.explanatory_note_path ? `<a href="/UP-08-Puchnin-Kriulin/absence_text/${absence.explanatory_note_path}" target="_blank">Скачать</a>` : '—'}
+                    ${absence.explanatory_note_path ? `<a style="color: black;" href="/UP-08-Puchnin-Kriulin/absence_text/${absence.explanatory_note_path}" target="_blank">Скачать</a>` : '—'}
                 </td>
                 <td>
                     <button class="save-btn save-btn-absences">Сохранить</button>
@@ -284,6 +284,40 @@ $('#add-absence-form').on('submit', function (e) {
                 alert(xhr.responseJSON.message || 'Ошибка при добавлении пропуска');
             });
     }
+});
+
+$(document).on('click', '.save-btn-absences', function () {
+    const row = $(this).closest('tr');
+    const id = row.data('id');
+
+    const absence = {
+        action: 'update',
+        absence_id: id,
+        lesson_id: row.find('.edit-lesson-id').text().trim(),
+        student_id: row.find('.edit-student-id').text().trim(),
+        minutes_missed: row.find('.edit-minutes-missed').text().trim(),
+        explanatory_note_path: row.find('.edit-explanatory-note-path').text().trim()
+    };
+
+    $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(absence))
+        .done(() => loadAbsences())
+        .fail(xhr => {
+            let msg = 'Ошибка при обновлении пропуска';
+            try {
+                const json = JSON.parse(xhr.responseText);
+                msg = json.message || json.errors?.join('\n') || msg;
+            } catch (e) {
+                msg = xhr.responseText;
+            }
+            alert(msg);
+        });
+});
+
+$(document).on('click', '.delete-btn-absences', function () {
+    const id = $(this).closest('tr').data('id');
+    $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify({ action: 'delete', absence_id: id }))
+        .done(() => loadAbsences())
+        .fail(xhr => alert('Ошибка: ' + xhr.responseText));
 });
 
 function uploadFile(file) {

@@ -62,12 +62,6 @@
                     break;
 
                 case 'update':
-                    if (!isset($data['absence_id'])) {
-                        http_response_code(400);
-                        echo json_encode(['status' => 'error', 'message' => 'ID пропуска обязателен']);
-                        exit();
-                    }
-
                     $absence = new Absence();
                     $absence->absence_id = $data['absence_id'];
                     foreach ($data as $key => $value) {
@@ -88,18 +82,19 @@
                         echo json_encode(['status' => 'success', 'data' => Absence::Get()]);
                     } else {
                         http_response_code(500);
-                        echo json_encode(['status' => 'error', 'message' => 'Ошибка при обновлении пропуска']);
+                        echo json_encode(['status' => 'error', 'message' => 'Ошибка при обновлении']);
                     }
                     break;
 
                 case 'delete':
-                    $item = new Absence();
-                    $item->absence_id = $data['absence_id'];
-                    if ($item->Delete()) {
+                    $absence = new Absence();
+                    $absence->absence_id = $data['absence_id'];
+
+                    if ($absence->Delete()) {
                         echo json_encode(['status' => 'success', 'data' => Absence::Get()]);
                     } else {
-                        http_response_code(500);
-                        echo json_encode(['status' => 'error', 'message' => 'Ошибка при удалении пропуска']);
+                        http_response_code(400);
+                        echo json_encode(['status' => 'error', 'message' => 'Нельзя удалить — есть связанные данные']);
                     }
                     break;
 
@@ -119,10 +114,10 @@
                     a.absence_id,
                     a.lesson_id,
                     a.student_id,
-                    s.last_name,
-                    g.group_name,
                     a.minutes_missed,
-                    a.explanatory_note_path
+                    a.explanatory_note_path,
+                    s.last_name,
+                    g.group_name
                 FROM Absences a
                 LEFT JOIN Students s ON a.student_id = s.student_id
                 LEFT JOIN StudentGroups g ON s.group_id = g.group_id
