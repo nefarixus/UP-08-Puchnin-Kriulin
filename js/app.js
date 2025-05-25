@@ -588,29 +588,58 @@ $(document).ready(function () {
 
     // --- TEACHERS ---
     const tableBodyTeachers = $('#teachers-table tbody');
+    const teacherSearchInput = $('#teacher-search-input');
 
-    function loadTeachers() {
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', function (data) {
-            tableBodyTeachers.empty();
-            data.forEach(teacher => {
-                const row = `
-                    <tr data-id="${teacher.teacher_id}">
-                        <td>${teacher.teacher_id}</td>
-                        <td contenteditable="true" class="edit-last-name">${teacher.last_name}</td>
-                        <td contenteditable="true" class="edit-first-name">${teacher.first_name}</td>
-                        <td contenteditable="true" class="edit-middle-name">${teacher.middle_name || ''}</td>
-                        <td contenteditable="true" class="edit-login">${teacher.login}</td>
-                        <td contenteditable="true" class="edit-password">${teacher.password}</td>
-                        <td>
-                            <button class="save-btn save-btn-teachers">Сохранить</button>
-                            <button class="delete-btn delete-btn-teachers">Удалить</button>
-                        </td>
-                    </tr>`;
-                tableBodyTeachers.append(row);
-            });
-        }, 'json');
+    let currentTeacherLoginFilter = '';
+
+function loadTeachers() {
+    let url = '/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php';
+    let params = {};
+
+    if (currentTeacherLoginFilter) {
+        params.login = currentTeacherLoginFilter;
     }
 
+    $.get(url, params, function (data) {
+        tableBodyTeachers.empty();
+        data.forEach(teacher => {
+            const row = `
+                <tr data-id="${teacher.teacher_id}">
+                    <td>${teacher.teacher_id}</td>
+                    <td contenteditable="true" class="edit-last-name">${teacher.last_name}</td>
+                    <td contenteditable="true" class="edit-first-name">${teacher.first_name}</td>
+                    <td contenteditable="true" class="edit-middle-name">${teacher.middle_name || ''}</td>
+                    <td contenteditable="true" class="edit-login">${teacher.login}</td>
+                    <td contenteditable="true" class="edit-password">${teacher.password}</td>
+                    <td>
+                        <button class="save-btn save-btn-teachers">Сохранить</button>
+                        <button class="delete-btn delete-btn-teachers">Удалить</button>
+                    </td>
+                </tr>`;
+            tableBodyTeachers.append(row);
+        });
+    }, 'json').fail(function (xhr) {
+        console.error("Ошибка загрузки данных", xhr);
+        alert("Не удалось загрузить список преподавателей");
+    });
+}
+
+    // --- Поиск по логину ---
+    if (teacherSearchInput.length > 0) {
+        teacherSearchInput.on('input', function () {
+            currentTeacherLoginFilter = $(this).val().trim();
+            loadTeachers();
+        });
+    }
+
+    // --- Сброс фильтров ---
+    $('#reset-teacher-filters').on('click', function () {
+        currentTeacherLoginFilter = '';
+        teacherSearchInput.val('');
+        loadTeachers();
+    });
+
+    // --- Загрузка при старте ---
     if ($('#teachers-table').length > 0) {
         loadTeachers();
     }
@@ -836,58 +865,62 @@ $(document).ready(function () {
 });
 
 /* workload */
+$(document).ready(function () {
+    const tableBodyWorkload = $('#workload-table tbody');
+    const sortGroupSelectWorkload = $('#sort-group-select');
 
-const tableBodyWorkload = $('#workload-table tbody');
-const workloadSearchInput = $('#workload-search-input');
-const sortGroupSelectWorkload = $('#sort-group-select');
+    let currentWorkloadGroupFilter = '';
 
-let currentWorkloadSearch = '';
-let currentWorkloadGroupFilter = '';
+    function loadWorkloads() {
+        let url = '/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php';
+        let params = {};
 
-function loadWorkloads() {
-    let url = '/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php';
-    let params = {};
-    if (currentWorkloadSearch) params.search = currentWorkloadSearch;
-    if (currentWorkloadGroupFilter) params.group_id = currentWorkloadGroupFilter;
+        if (currentWorkloadGroupFilter) {
+            params.group_id = currentWorkloadGroupFilter;
+        }
 
-    $.get(url, params, function(data) {
-        renderWorkloads(data);
-    }, 'json');
-}
+        $.get(url, params, function (data) {
+            renderWorkloads(data);
+        }, 'json');
+    }
 
-function renderWorkloads(data) {
+    function renderWorkloads(data) {
+    console.log('Полученные данные:', data); // Логируем данные
     tableBodyWorkload.empty();
+
+    if (!Array.isArray(data) || data.length === 0) {
+        tableBodyWorkload.append('<tr><td colspan="10">Нет данных</td></tr>');
+        return;
+    }
 
     data.forEach(item => {
         const row = `
-            <tr data-id="${item.workload_id}">
-                <td>${item.workload_id}</td>
-                <td contenteditable="true" class="edit-teacher-id">${item.teacher_id}</td>
-                <td contenteditable="true" class="edit-discipline-id">${item.discipline_id}</td>
-                <td contenteditable="true" class="edit-group-id">${item.group_name || item.group_id}</td>
-                <td contenteditable="true" class="edit-lecture-hours">${item.lecture_hours}</td>
-                <td contenteditable="true" class="edit-practice-hours">${item.practice_hours}</td>
-                <td contenteditable="true" class="edit-consultation-hours">${item.consultation_hours}</td>
-                <td contenteditable="true" class="edit-course-project-hours">${item.course_project_hours}</td>
-                <td contenteditable="true" class="edit-exam-hours">${item.exam_hours}</td>
-                <td>
-                    <button class="save-btn save-btn-workload">Сохранить</button>
-                    <button class="delete-btn delete-btn-workload">Удалить</button>
-                </td>
-            </tr>`;
+    <tr data-id="${item.workload_id}">
+        <td>${item.workload_id}</td>
+        <td contenteditable="true" class="edit-teacher-name">
+            ${item.last_name} ${item.first_name} ${item.middle_name || ''}
+        </td>
+        <td contenteditable="true" class="edit-discipline-name">
+            ${item.discipline_name || item.discipline_id}
+        </td>
+        <td contenteditable="true" class="edit-group-name">
+            ${item.group_name || item.group_id}
+        </td>
+        <td contenteditable="true" class="edit-lecture-hours">${item.lecture_hours}</td>
+        <td contenteditable="true" class="edit-practice-hours">${item.practice_hours}</td>
+        <td contenteditable="true" class="edit-consultation-hours">${item.consultation_hours}</td>
+        <td contenteditable="true" class="edit-course-project-hours">${item.course_project_hours}</td>
+        <td contenteditable="true" class="edit-exam-hours">${item.exam_hours}</td>
+        <td>
+            <button class="save-btn save-btn-workload">Сохранить</button>
+            <button class="delete-btn delete-btn-workload">Удалить</button>
+        </td>
+    </tr>`;
         tableBodyWorkload.append(row);
     });
 }
 
-// --- Поиск ---
-    if (workloadSearchInput.length > 0) {
-        workloadSearchInput.on('input', function () {
-            currentWorkloadSearch = $(this).val().trim();
-            loadWorkloads();
-        });
-    }
-
-// --- Фильтр по группе ---
+    // --- Фильтр по группе ---
     if (sortGroupSelectWorkload.length > 0) {
         sortGroupSelectWorkload.on('change', function () {
             currentWorkloadGroupFilter = $(this).val().trim();
@@ -895,21 +928,19 @@ function renderWorkloads(data) {
         });
     }
 
-// --- Сброс фильтров ---
+    // --- Сброс фильтров ---
     $('#reset-workload-filters').on('click', function () {
-        currentWorkloadSearch = '';
         currentWorkloadGroupFilter = '';
-        workloadSearchInput.val('');
         sortGroupSelectWorkload.val('');
         loadWorkloads();
     });
 
-// --- Подгрузка групп ---
+    // --- Подгрузка групп ---
     function loadWorkloadGroups() {
         const groupSelect = $('#sort-group-select');
         if (groupSelect.length === 0) return;
 
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function(data) {
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function (data) {
             groupSelect.empty().append('<option value="">Все группы</option>');
 
             data.forEach(group => {
@@ -918,23 +949,33 @@ function renderWorkloads(data) {
         }, 'json');
     }
 
-// --- Инициализация при загрузке ---
+    // --- Инициализация при загрузке ---
     if ($('#workload-table').length > 0) {
         loadWorkloads();
-        loadWorkloadGroups(); // Подгружаем группы для фильтра
+        loadWorkloadGroups();
     }
 
+    // --- Добавление новой нагрузки ---
     $('#add-workload-form').on('submit', function (e) {
         e.preventDefault();
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
-        formData.forEach(field => data[field.name] = field.value);
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data), function () {
-            $('#add-workload-form')[0].reset();
-            loadWorkloads();
+
+        formData.forEach(field => {
+            data[field.name] = field.value;
         });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data))
+            .done(function () {
+                $('#add-workload-form')[0].reset();
+                loadWorkloads();
+            })
+            .fail(function (xhr) {
+                alert("Ошибка добавления нагрузки");
+            });
     });
 
+    // --- Сохранение изменений ---
     $(document).on('click', '.save-btn-workload', function () {
         const row = $(this).closest('tr');
         const id = row.data('id');
@@ -942,9 +983,9 @@ function renderWorkloads(data) {
         const item = {
             action: 'update',
             workload_id: id,
-            teacher_id: row.find('.edit-teacher-id').text(),
-            discipline_id: parseInt(row.find('.edit-discipline-name').data('discipline-id')) || row.find('.edit-discipline-id').text(),
-            group_id: parseInt(row.find('.edit-group-name').data('group-id')) || row.find('.edit-group-id').text(),
+            teacher_id: row.find('.edit-teacher-name').data('teacher-id') || row.find('.edit-teacher-name').text(),
+            discipline_id: row.find('.edit-discipline-name').data('discipline-id') || row.find('.edit-discipline-name').text(),
+            group_id: row.find('.edit-group-name').data('group-id'),
             lecture_hours: row.find('.edit-lecture-hours').text(),
             practice_hours: row.find('.edit-practice-hours').text(),
             consultation_hours: row.find('.edit-consultation-hours').text(),
@@ -952,19 +993,28 @@ function renderWorkloads(data) {
             exam_hours: row.find('.edit-exam-hours').text()
         };
 
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(item), function () {
-            loadWorkloads();
-        });
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(item))
+            .done(function () {
+                loadWorkloads();
+            })
+            .fail(function (xhr) {
+                alert("Ошибка сохранения");
+            });
     });
 
-     $(document).on('click', '.delete-btn-workload', function () {
+    // --- Удаление записи ---
+    $(document).on('click', '.delete-btn-workload', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', workload_id: id };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data), function () {
-            loadWorkloads();
-        });
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data))
+            .done(function () {
+                loadWorkloads();
+            })
+            .fail(function (xhr) {
+                alert("Ошибка удаления");
+            });
     });
-
+});
 
 /* lesson */
 
