@@ -8,7 +8,7 @@
     <form id="add-grade-form" class="add_form" method="post">
         <input type="number" name="lesson_id" placeholder="ID занятия"><br>
         <input type="number" name="student_id" placeholder="ID студента"><br>
-        <input type="number" name="grade_value" placeholder="Оценка"><br>
+        <input type="number" name="grade_value" min="2" max="5" placeholder="Оценка"><br>
         <button class="add-students-btn" type="submit" name="create">Добавить</button>
     </form>
 

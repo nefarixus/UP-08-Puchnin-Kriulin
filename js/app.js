@@ -658,7 +658,7 @@ $(document).ready(function () {
 $(document).ready(function () {
     const tableBodyGrades = $('#grades-table tbody');
 
-    // Функция для определения класса по оценке
+
     function getColorClass(gradeValue) {
         switch (parseInt(gradeValue)) {
             case 5:
@@ -800,9 +800,19 @@ $(document).ready(function () {
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
         formData.forEach(field => data[field.name] = field.value);
+
+        // Проверка данных
+        if (![0,1].includes(parseInt(data.is_present)) || ![0,1].includes(parseInt(data.is_completed))) {
+            alert("Поля 'Присутствует' и 'Завершено' должны быть 0 или 1");
+            return;
+        }
+
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(data), function () {
             $('#add-consultation-form')[0].reset();
             loadConsultations();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            alert("Ошибка при добавлении консультации");
+            console.error(textStatus, errorThrown);
         });
     });
 
@@ -821,8 +831,17 @@ $(document).ready(function () {
             is_completed: row.find('.edit-is-completed').text()
         };
 
+        // Проверка данных
+        if (![0,1].includes(parseInt(item.is_present)) || ![0,1].includes(parseInt(item.is_completed))) {
+            alert("Поля 'Присутствует' и 'Завершено' должны быть 0 или 1");
+            return;
+        }
+
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(item), function () {
             loadConsultations();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            alert("Ошибка при сохранении изменений");
+            console.error(textStatus, errorThrown);
         });
     });
 
@@ -831,6 +850,9 @@ $(document).ready(function () {
         const data = { action: 'delete', consultation_id: id };
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(data), function () {
             loadConsultations();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            alert("Ошибка при удалении консультации");
+            console.error(textStatus, errorThrown);
         });
     });
 });

@@ -1,24 +1,22 @@
 <?php
-    require_once "../../includes/parts/connection.php";
-    require_once "../../models/Consultation.php";
+require_once "../../includes/parts/connection.php";
+require_once "../../models/Consultation.php";
 
-    require_once "log_error.php";
+require_once "log_error.php";
 
-    header("Content-Type: application/json");
+header("Content-Type: application/json");
 
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        $items = Consultation::Get();
-        echo json_encode($items);
-        exit();
-    } else {
-        logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $items = Consultation::Get();
+    echo json_encode($items);
+    exit();
+}
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require_once "log_error.php";
-        $data = json_decode(file_get_contents('php://input'), true);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
 
-        if (isset($data['action'])) {
+    if (isset($data['action'])) {
+        try {
             switch ($data['action']) {
                 case 'create':
                     $item = new Consultation();
@@ -49,12 +47,25 @@
                     $item->Delete();
                     echo json_encode(['status' => 'success']);
                     break;
+
+                default:
+                    throw new Exception("Неизвестное действие: {$data['action']}");
             }
-            exit();
+        } catch (Exception $e) {
+            logError($e->getMessage());
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
+        exit();
     }
-    logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
+
+    logError("Действие не указано");
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Неверный метод запроса']);
+    echo json_encode(['status' => 'error', 'message' => 'Действие не указано']);
     exit();
-?>
+}
+
+logError("Неверный метод запроса: " . $_SERVER['REQUEST_METHOD']);
+http_response_code(405);
+echo json_encode(['status' => 'error', 'message' => 'Метод не поддерживается']);
+exit();
