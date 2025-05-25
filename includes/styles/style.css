@@ -137,6 +137,16 @@ input[type="date"] {
     padding: 10px;
     border-radius: 5px;
 }
+.search-sort
+input[type="text"],
+input[type="number"], 
+input[type="date"],
+button {
+    background-color: white;
+    border: 1px solid #0060AC;
+    padding: 10px;
+    border-radius: 5px;
+}
 
 .add_form
 input[type="text"],
