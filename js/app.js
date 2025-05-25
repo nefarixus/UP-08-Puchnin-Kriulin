@@ -325,65 +325,146 @@ $(document).ready(function () {
 
     // --- ABSENCES ---
     const tableBodyAbsences = $('#absences-table tbody');
+    let currentAbsencesSearch = '';
 
-    function loadAbsences() {
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', function (data) {
-            tableBodyAbsences.empty();
-            data.forEach(absence => {
-                const row = `
-                    <tr data-id="${absence.absence_id}">
-                        <td>${absence.absence_id}</td>
-                        <td contenteditable="true" class="edit-lesson-id">${absence.lesson_id}</td>
-                        <td contenteditable="true" class="edit-student-id">${absence.student_id}</td>
-                        <td contenteditable="true" class="edit-minutes-missed">${absence.minutes_missed}</td>
-                        <td contenteditable="true" class="edit-explanatory-note-path">${absence.explanatory_note_path || ''}</td>
-                        <td>
-                            <button class="save-btn save-btn-absences">Сохранить</button>
-                            <button class="delete-btn delete-btn-absences">Удалить</button>
-                        </td>
-                    </tr>`;
-                tableBodyAbsences.append(row);
-            });
-        }, 'json');
+    function loadAbsences(filters = {}) {
+        let url = '/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php';
+        $.get(url + '?search=' + encodeURIComponent(currentAbsencesSearch), function(data) {
+            renderAbsences(data);
+        }, 'json')
+        .fail(function(xhr) {
+            alert('Ошибка при загрузке пропусков');
+        });
     }
 
+    function renderAbsences(data) {
+        tableBodyAbsences.empty();
+
+        data.forEach(absence => {
+            const row = `
+                <tr data-id="${absence.absence_id}">
+                    <td>${absence.absence_id}</td>
+                    <td contenteditable="true" class="edit-lesson-id">${absence.lesson_id || ''}</td>
+                    <td contenteditable="true" class="edit-student-id">${absence.student_id || ''}</td>
+                    <td>${absence.last_name || '—'}</td>
+                    <td>${absence.group_name || '—'}</td>
+                    <td contenteditable="true" class="edit-minutes-missed">${absence.minutes_missed || ''}</td>
+                    <td>
+                        ${absence.explanatory_note_path ? 
+                            `<a class="download" href="/UP-08-Puchnin-Kriulin/absence_text/${absence.explanatory_note_path}" target="_blank">Скачать</a>` : 
+                            '—'}
+                    </td>
+                    <td>
+                        <button class="save-btn save-btn-absences">Сохранить</button>
+                        <button class="delete-btn delete-btn-absences">Удалить</button>
+                    </td>
+                </tr>`;
+            tableBodyAbsences.append(row);
+        });
+    }
+
+    // --- Поиск ---
+    $('#absence-search-input').on('input', function () {
+        currentAbsencesSearch = $(this).val().trim();
+        loadAbsences();
+    });
+
+    $('#reset-absence-filters').on('click', function () {
+        $('#absence-search-input').val('');
+        currentAbsencesSearch = '';
+        loadAbsences();
+    });
+
+    // --- Загрузка при старте ---
     if ($('#absences-table').length > 0) {
         loadAbsences();
     }
 
+    // --- Добавление пропуска ---
     $('#add-absence-form').on('submit', function (e) {
         e.preventDefault();
+
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
         formData.forEach(field => data[field.name] = field.value);
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(data), function () {
-            $('#add-absence-form')[0].reset();
-            loadAbsences();
-        });
+
+        const fileInput = $('#explanatory-note-file')[0];
+        const file = fileInput.files[0];
+
+        if (file && file.type === 'application/pdf') {
+            const reader = new FileReader();
+            reader.onload = function () {
+                data.explanatory_note_path = file.name; // имя файла
+                $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(data), function () {
+                    uploadFile(file); // отправляем файл на сервер
+                    $('#add-absence-form')[0].reset();
+                    loadAbsences();
+                });
+            };
+            reader.readAsDataURL(file);
+        } else if (file && file.type !== 'application/pdf') {
+            alert('Только PDF-файлы разрешены');
+        } else {
+            $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(data))
+                .done(() => {
+                    $('#add-absence-form')[0].reset();
+                    loadAbsences();
+                })
+                .fail(xhr => alert(xhr.responseJSON.message || 'Ошибка при добавлении'));
+        }
     });
 
+    function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        $.ajax({
+            url: '/UP-08-Puchnin-Kriulin/upload_absence_file.php',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                console.log('Файл успешно загружен:', response.path);
+            },
+            error: function () {
+                alert('Ошибка загрузки файла');
+            }
+        });
+    }
+
+    // --- Сохранение изменений ---
     $(document).on('click', '.save-btn-absences', function () {
         const row = $(this).closest('tr');
         const id = row.data('id');
         const absence = {
             action: 'update',
             absence_id: id,
-            lesson_id: row.find('.edit-lesson-id').text(),
-            student_id: row.find('.edit-student-id').text(),
-            minutes_missed: row.find('.edit-minutes-missed').text(),
-            explanatory_note_path: row.find('.edit-explanatory-note-path').text() || null
+            lesson_id: row.find('.edit-lesson-id').text().trim(),
+            student_id: row.find('.edit-student-id').text().trim(),
+            minutes_missed: row.find('.edit-minutes-missed').text().trim()
         };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(absence), function () {
-            loadAbsences();
-        });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(absence))
+            .done(() => {
+                loadAbsences();
+            })
+            .fail(xhr => {
+                alert(xhr.responseJSON.message || 'Ошибка при обновлении');
+            });
     });
 
+    // --- Удаление пропуска ---
     $(document).on('click', '.delete-btn-absences', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', absence_id: id };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(data), function () {
-            loadAbsences();
-        });
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify(data))
+            .done(() => {
+                loadAbsences();
+            })
+            .fail(xhr => {
+                alert(xhr.responseJSON.message || 'Ошибка при удалении');
+            });
     });
 
 
