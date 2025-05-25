@@ -11,8 +11,8 @@
 
         <!-- Поиск -->
         <h2 style="margin-top: 15px;">Поиск по дисциплинам</h2>
-        <input type="text" id="discipline-search-input" placeholder="Введите название дисциплины">
-        <button id="reset-discipline-filters">Сбросить</button>
+        <input type="text" class="discipline-search-input" id="discipline-search-input" placeholder="Введите название дисциплины">
+        <button class="reset-discipline-filters" id="reset-discipline-filters">Сбросить</button>
 
         <!-- Список дисциплин -->
         <h2 style="margin-top: 15px;">Список дисциплин</h2>
@@ -29,7 +29,7 @@
 
         <!-- Выбор дисциплины -->
         <h2 style="margin-top: 15px;">Выберите дисциплину, чтобы посмотреть нагрузку</h2>
-        <select id="discipline-group-select" class="form-control">
+        <select class="discipline-group-select" id="discipline-group-select" class="form-control">
             <option value="">Выберите дисциплину</option>
         </select>
 
