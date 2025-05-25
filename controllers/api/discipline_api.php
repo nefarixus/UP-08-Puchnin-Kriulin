@@ -22,13 +22,16 @@
                     if (!empty($errors)) {
                         http_response_code(400);
                         echo json_encode(['status' => 'error', 'errors' => $errors]);
+                        logError("disciplines.php: ". implode('; ', $errors));
                         exit();
                     }
 
                     if ($item->Insert()) {
-                        echo json_encode(['status' => 'success']);
+                        $items = Discipline::Get();
+                        echo json_encode($items);
                     } else {
                         http_response_code(500);
+                        logError('disciplines.php: ошибка при добавлении дисциплины');
                         echo json_encode(['status' => 'error', 'message' => 'Ошибка при добавлении дисциплины']);
                     }
                     break;
@@ -51,6 +54,7 @@
                     }
 
                     if ($item->Update()) {
+                        $items = Discipline::Get();
                         echo json_encode(['status' => 'success']);
                     } else {
                         http_response_code(500);
@@ -75,8 +79,14 @@
                     }
                     break;
 
-                case 'filter':
-                    $query = "SELECT * FROM Disciplines WHERE discipline_name LIKE '%{$data['search']}%' ";
+                case 'search':
+                    $query = "SELECT * FROM Disciplines WHERE 1=1";
+
+                    if (!empty($data['search'])) {
+                        $search = mysqli_real_escape_string($db_connection, $data['search']);
+                        $query .= " AND discipline_name LIKE '%$search%'";
+                    }
+
                     $result = mysqli_query($db_connection, $query);
                     $items = [];
 
@@ -95,19 +105,63 @@
             }
             exit();
         }
+        if (!empty($data['search'])) {
+            $search = mysqli_real_escape_string($db_connection, $data['search']);
+            $query = "SELECT * FROM Disciplines WHERE discipline_name LIKE '%$search%' ORDER BY discipline_id ASC";
 
+            $result = mysqli_query($db_connection, $query);
+            $items = [];
+
+            while ($row = mysqli_fetch_assoc($result)) {
+                $items[] = new Discipline((object)$row);
+            }
+
+            echo json_encode($items);
+            exit();
+        }
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Поле "action" обязательно']);
+        logError('disciplines.php: Поле "action" или "search" обязательно');
+        echo json_encode(['status' => 'error', 'message' => 'Поле "action" или "search" обязательно']);
         exit();
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        $query = "SELECT * FROM Disciplines WHERE 1=1";
+        // Получаем информацию по группам для выбранной дисциплины
+        if (!empty($_GET['discipline_id'])) {
+            $disciplineId = mysqli_real_escape_string($db_connection, $_GET['discipline_id']);
 
+            $query = "
+                SELECT 
+                    g.group_name,
+                    COUNT(l.lesson_id) AS lesson_count,
+                    SUM(dp.hours) AS total_hours
+                FROM Teacher_Workload tw
+                LEFT JOIN StudentGroups g ON tw.group_id = g.group_id
+                LEFT JOIN Discipline_Programs dp ON tw.discipline_id = dp.discipline_id
+                LEFT JOIN Lessons l ON dp.program_id = l.program_id
+                WHERE tw.discipline_id = $disciplineId
+                GROUP BY g.group_id
+            ";
+
+            $result = mysqli_query($db_connection, $query);
+            $items = [];
+
+            while ($row = mysqli_fetch_assoc($result)) {
+                $items[] = new Discipline((object)$row);
+            }
+
+            echo json_encode($items);
+            exit();
+        }
+
+        // Поиск через GET /?search=...
+        $query = "SELECT * FROM Disciplines WHERE 1=1";
         if (!empty($_GET['search'])) {
             $search = mysqli_real_escape_string($db_connection, $_GET['search']);
             $query .= " AND discipline_name LIKE '%$search%'";
         }
+
+        $query .= " ORDER BY discipline_id ASC";
 
         $result = mysqli_query($db_connection, $query);
         $items = [];

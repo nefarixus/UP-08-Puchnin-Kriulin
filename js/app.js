@@ -190,12 +190,10 @@ $(document).ready(function () {
         const url = '/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php';
 
         if (currentDisciplineSearch.trim() !== '') {
-            // Отправляем POST с фильтром
-            $.post(url, { action: 'filter', search: currentDisciplineSearch }, function(data) {
+            $.get(url + '?search=' + encodeURIComponent(currentDisciplineSearch), function(data) {
                 renderDisciplines(data);
             }, 'json');
         } else {
-            // Или просто GET
             $.get(url, function(data) {
                 renderDisciplines(data);
             }, 'json');
