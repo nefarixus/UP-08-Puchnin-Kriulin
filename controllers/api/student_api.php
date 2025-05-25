@@ -110,8 +110,6 @@
 
         echo json_encode($items);
         exit();
-    } else {
-        logError("students.php: Неверный метод запроса");
     }
 
     http_response_code(400);

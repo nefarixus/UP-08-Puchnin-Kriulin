@@ -7,10 +7,34 @@
     header("Content-Type: application/json");
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        echo json_encode(DisciplineProgram::Get());
+        $query = "
+            SELECT 
+                dp.discipline_id,
+                g.group_name,
+                COUNT(*) AS lesson_count,
+                SUM(dp.hours) AS total_hours
+            FROM Discipline_Programs dp
+            LEFT JOIN StudentGroups g ON dp.group_id = g.group_id
+            WHERE dp.discipline_id = $disciplineId
+            GROUP BY dp.group_id
+        ";
+
+        if (!empty($_GET['discipline_id'])) {
+            $disciplineId = mysqli_real_escape_string($db_connection, $_GET['discipline_id']);
+            $query .= " WHERE dp.discipline_id = $disciplineId ";
+        }
+
+        $query .= "GROUP BY tw.group_id";
+
+        $result = mysqli_query($db_connection, $query);
+        $items = [];
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $items[] = (object)$row;
+        }
+
+        echo json_encode($items);
         exit();
-    } else {
-        logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {

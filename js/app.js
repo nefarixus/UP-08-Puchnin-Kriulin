@@ -184,61 +184,146 @@ $(document).ready(function () {
 
     // --- DISCIPLINES ---
     const tableBodyDisciplines = $('#disciplines-table tbody');
+    let currentDisciplineSearch = '';
 
     function loadDisciplines() {
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', function (data) {
-            tableBodyDisciplines.empty();
-            data.forEach(discipline => {
-                const row = `
-                    <tr data-id="${discipline.discipline_id}">
-                        <td>${discipline.discipline_id}</td>
-                        <td contenteditable="true" class="edit-discipline-name">${discipline.discipline_name}</td>
-                        <td>
-                            <button class="save-btn save-btn-disciplines">Сохранить</button>
-                            <button class="delete-btn delete-btn-disciplines">Удалить</button>
-                        </td>
-                    </tr>`;
-                tableBodyDisciplines.append(row);
-            });
-        }, 'json');
+        const url = '/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php';
+
+        if (currentDisciplineSearch.trim() !== '') {
+            // Отправляем POST с фильтром
+            $.post(url, { action: 'filter', search: currentDisciplineSearch }, function(data) {
+                renderDisciplines(data);
+            }, 'json');
+        } else {
+            // Или просто GET
+            $.get(url, function(data) {
+                renderDisciplines(data);
+            }, 'json');
+        }
     }
 
-    if ($('#disciplines-table').length > 0) {
-        loadDisciplines();
+    function renderDisciplines(data) {
+        tableBodyDisciplines.empty();
+
+        data.forEach(discipline => {
+            const row = `
+                <tr data-id="${discipline.discipline_id}">
+                    <td>${discipline.discipline_id}</td>
+                    <td contenteditable="true" class="edit-discipline-name">${discipline.discipline_name || ''}</td>
+                    <td>
+                        <button class="save-btn save-btn-disciplines">Сохранить</button>
+                        <button class="delete-btn delete-btn-disciplines">Удалить</button>
+                    </td>
+                </tr>`;
+            tableBodyDisciplines.append(row);
+        });
     }
+
+    $('#discipline-search-input').on('input', function () {
+        currentDisciplineSearch = $(this).val().trim();
+        loadDisciplines();
+    });
+
+    $('#reset-discipline-filters').on('click', function () {
+        $('#discipline-search-input').val('');
+        currentDisciplineSearch = '';
+        loadDisciplines();
+    });
 
     $('#add-discipline-form').on('submit', function (e) {
         e.preventDefault();
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
+
         formData.forEach(field => data[field.name] = field.value);
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(data), function () {
-            $('#add-discipline-form')[0].reset();
-            loadDisciplines();
-        });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(data))
+            .done(function () {
+                $('#add-discipline-form')[0].reset();
+                loadDisciplines();
+            })
+            .fail(function (xhr) {
+                alert(xhr.responseJSON.message || 'Ошибка при добавлении дисциплины');
+            });
     });
 
     $(document).on('click', '.save-btn-disciplines', function () {
         const row = $(this).closest('tr');
         const id = row.data('id');
+
         const discipline = {
             action: 'update',
             discipline_id: id,
             discipline_name: row.find('.edit-discipline-name').text()
         };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(discipline), function () {
-            loadDisciplines();
-        });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(discipline))
+            .done(() => loadDisciplines())
+            .fail(() => alert('Ошибка при обновлении'));
     });
 
     $(document).on('click', '.delete-btn-disciplines', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', discipline_id: id };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(data), function () {
-            loadDisciplines();
-        });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', JSON.stringify(data))
+            .done(() => loadDisciplines())
+            .fail(xhr => alert(xhr.responseJSON.message || 'Нельзя удалить — есть связи'));
     });
 
+    $(document).ready(function () {
+        if ($('#disciplines-table').length > 0) {
+            loadDisciplines();
+        }
+
+        if ($('#discipline-group-select').length > 0) {
+            loadDisciplineOptions();
+        }
+    });
+
+    function loadDisciplineOptions() {
+        const select = $('#discipline-group-select');
+        if (select.length === 0) return;
+
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', function(data) {
+            select.empty().append('<option value="">Выберите дисциплину</option>');
+            data.forEach(discipline => {
+                select.append(`<option value="${discipline.discipline_id}">${discipline.discipline_name}</option>`);
+            });
+        }, 'json');
+    }
+
+    function loadGroupInfoByDiscipline(disciplineId) {
+        const tableBody = $('#discipline-students-table tbody');
+        tableBody.empty();
+
+        if (!disciplineId) {
+            tableBody.append('<tr><td colspan="3">Выберите дисциплину</td></tr>');
+            return;
+        }
+
+        $.get(`/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php?discipline_id=${disciplineId}`, function(data) {
+            if (data.length === 0) {
+                tableBody.append('<tr><td colspan="3">Нет данных по этой дисциплине</td></tr>');
+                return;
+            }
+
+            data.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.group_name || '—'}</td>
+                        <td>${item.lesson_count || 0}</td>
+                        <td>${item.total_hours || 0}</td>
+                    </tr>`;
+                tableBody.append(row);
+            });
+        }, 'json');
+    }
+
+    $(document).on('change', '#discipline-group-select', function () {
+        const disciplineId = $(this).val();
+        loadGroupInfoByDiscipline(disciplineId);
+    });
 
     // --- ABSENCES ---
     const tableBodyAbsences = $('#absences-table tbody');
