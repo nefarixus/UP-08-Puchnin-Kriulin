@@ -591,29 +591,58 @@ $(document).on('click', '.delete-btn-programs', function () {
 
     // --- TEACHERS ---
     const tableBodyTeachers = $('#teachers-table tbody');
+    const teacherSearchInput = $('#teacher-search-input');
 
-    function loadTeachers() {
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', function (data) {
-            tableBodyTeachers.empty();
-            data.forEach(teacher => {
-                const row = `
-                    <tr data-id="${teacher.teacher_id}">
-                        <td>${teacher.teacher_id}</td>
-                        <td contenteditable="true" class="edit-last-name">${teacher.last_name}</td>
-                        <td contenteditable="true" class="edit-first-name">${teacher.first_name}</td>
-                        <td contenteditable="true" class="edit-middle-name">${teacher.middle_name || ''}</td>
-                        <td contenteditable="true" class="edit-login">${teacher.login}</td>
-                        <td contenteditable="true" class="edit-password">${teacher.password}</td>
-                        <td>
-                            <button class="save-btn save-btn-teachers">Сохранить</button>
-                            <button class="delete-btn delete-btn-teachers">Удалить</button>
-                        </td>
-                    </tr>`;
-                tableBodyTeachers.append(row);
-            });
-        }, 'json');
+    let currentTeacherLoginFilter = '';
+
+function loadTeachers() {
+    let url = '/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php';
+    let params = {};
+
+    if (currentTeacherLoginFilter) {
+        params.login = currentTeacherLoginFilter;
     }
 
+    $.get(url, params, function (data) {
+        tableBodyTeachers.empty();
+        data.forEach(teacher => {
+            const row = `
+                <tr data-id="${teacher.teacher_id}">
+                    <td>${teacher.teacher_id}</td>
+                    <td contenteditable="true" class="edit-last-name">${teacher.last_name}</td>
+                    <td contenteditable="true" class="edit-first-name">${teacher.first_name}</td>
+                    <td contenteditable="true" class="edit-middle-name">${teacher.middle_name || ''}</td>
+                    <td contenteditable="true" class="edit-login">${teacher.login}</td>
+                    <td contenteditable="true" class="edit-password">${teacher.password}</td>
+                    <td>
+                        <button class="save-btn save-btn-teachers">Сохранить</button>
+                        <button class="delete-btn delete-btn-teachers">Удалить</button>
+                    </td>
+                </tr>`;
+            tableBodyTeachers.append(row);
+        });
+    }, 'json').fail(function (xhr) {
+        console.error("Ошибка загрузки данных", xhr);
+        alert("Не удалось загрузить список преподавателей");
+    });
+}
+
+    // --- Поиск по логину ---
+    if (teacherSearchInput.length > 0) {
+        teacherSearchInput.on('input', function () {
+            currentTeacherLoginFilter = $(this).val().trim();
+            loadTeachers();
+        });
+    }
+
+    // --- Сброс фильтров ---
+    $('#reset-teacher-filters').on('click', function () {
+        currentTeacherLoginFilter = '';
+        teacherSearchInput.val('');
+        loadTeachers();
+    });
+
+    // --- Загрузка при старте ---
     if ($('#teachers-table').length > 0) {
         loadTeachers();
     }
@@ -660,16 +689,38 @@ $(document).on('click', '.delete-btn-programs', function () {
 $(document).ready(function () {
     const tableBodyGrades = $('#grades-table tbody');
 
+
+    function getColorClass(gradeValue) {
+        switch (parseInt(gradeValue)) {
+            case 5:
+                return 'green';
+            case 4:
+                return 'dark-yellow';
+            case 3:
+                return 'orange';
+            default:
+                return 'gray';
+        }
+    }
+
     function loadGrades() {
         $.get('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', function (data) {
             tableBodyGrades.empty();
+
+            if (!Array.isArray(data)) {
+                console.error("Неверный формат данных:", data);
+                return;
+            }
+
             data.forEach(grade => {
+                const gradeClass = getColorClass(grade.grade_value); 
+
                 const row = `
                     <tr data-id="${grade.grade_id}">
                         <td>${grade.grade_id}</td>
                         <td contenteditable="true" class="edit-lesson-id">${grade.lesson_id}</td>
                         <td contenteditable="true" class="edit-student-id">${grade.student_id}</td>
-                        <td contenteditable="true" class="edit-grade-value">${grade.grade_value}</td>
+                        <td contenteditable="true" class="edit-grade-value grade-cell ${gradeClass}">${grade.grade_value}</td>
                         <td>
                             <button class="save-btn save-btn-grades">Сохранить</button>
                             <button class="delete-btn delete-btn-grades">Удалить</button>
@@ -677,7 +728,9 @@ $(document).ready(function () {
                     </tr>`;
                 tableBodyGrades.append(row);
             });
-        }, 'json');
+        }, 'json').fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка загрузки оценок:", textStatus, errorThrown);
+        });
     }
 
     if ($('#grades-table').length > 0) {
@@ -687,11 +740,21 @@ $(document).ready(function () {
     $('#add-grade-form').on('submit', function (e) {
         e.preventDefault();
         const formData = $(this).serializeArray();
+        const gradeValue = formData.find(f => f.name === 'grade_value')?.value;
+
+        if (![3,4,5].includes(parseInt(gradeValue))) {
+            alert("Оценка должна быть 3, 4 или 5");
+            return;
+        }
+
         const data = { action: 'create' };
         formData.forEach(field => data[field.name] = field.value);
+
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(data), function () {
             $('#add-grade-form')[0].reset();
             loadGrades();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка добавления оценки:", textStatus, errorThrown);
         });
     });
 
@@ -699,24 +762,35 @@ $(document).ready(function () {
         const row = $(this).closest('tr');
         const id = row.data('id');
 
+        const newGradeValue = row.find('.edit-grade-value').text();
+        const cell = row.find('.edit-grade-value');
+
+        const newClass = getColorClass(newGradeValue);
+        cell.removeClass("green dark-yellow orange gray").addClass(newClass);
+
         const grade = {
             action: 'update',
             grade_id: id,
             lesson_id: row.find('.edit-lesson-id').text(),
             student_id: row.find('.edit-student-id').text(),
-            grade_value: row.find('.edit-grade-value').text()
+            grade_value: newGradeValue
         };
 
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(grade), function () {
-            loadGrades();
+            loadGrades(); 
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка обновления оценки:", textStatus, errorThrown);
         });
     });
 
     $(document).on('click', '.delete-btn-grades', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', grade_id: id };
+
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/grade_api.php', JSON.stringify(data), function () {
             loadGrades();
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Ошибка удаления оценки:", textStatus, errorThrown);
         });
     });
 });
@@ -793,50 +867,117 @@ $(document).ready(function () {
 });
 
 /* workload */
-
 $(document).ready(function () {
-    const tableBody = $('#workload-table tbody');
+    const tableBodyWorkload = $('#workload-table tbody');
+    const sortGroupSelectWorkload = $('#sort-group-select');
+
+    let currentWorkloadGroupFilter = '';
 
     function loadWorkloads() {
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', function (data) {
-            tableBody.empty();
-            data.forEach(item => {
-                const row = `
-                    <tr data-id="${item.workload_id}">
-                        <td>${item.workload_id}</td>
-                        <td contenteditable="true" class="edit-teacher-id">${item.teacher_id}</td>
-                        <td contenteditable="true" class="edit-discipline-id">${item.discipline_id}</td>
-                        <td contenteditable="true" class="edit-group-id">${item.group_id}</td>
-                        <td contenteditable="true" class="edit-lecture-hours">${item.lecture_hours}</td>
-                        <td contenteditable="true" class="edit-practice-hours">${item.practice_hours}</td>
-                        <td contenteditable="true" class="edit-consultation-hours">${item.consultation_hours}</td>
-                        <td contenteditable="true" class="edit-course-project-hours">${item.course_project_hours}</td>
-                        <td contenteditable="true" class="edit-exam-hours">${item.exam_hours}</td>
-                        <td>
-                            <button class="save-btn save-btn-workload">Сохранить</button>
-                            <button class="delete-btn delete-btn-workload">Удалить</button>
-                        </td>
-                    </tr>`;
-                tableBody.append(row);
+        let url = '/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php';
+        let params = {};
+
+        if (currentWorkloadGroupFilter) {
+            params.group_id = currentWorkloadGroupFilter;
+        }
+
+        $.get(url, params, function (data) {
+            renderWorkloads(data);
+        }, 'json');
+    }
+
+    function renderWorkloads(data) {
+    console.log('Полученные данные:', data); // Логируем данные
+    tableBodyWorkload.empty();
+
+    if (!Array.isArray(data) || data.length === 0) {
+        tableBodyWorkload.append('<tr><td colspan="10">Нет данных</td></tr>');
+        return;
+    }
+
+    data.forEach(item => {
+        const row = `
+    <tr data-id="${item.workload_id}">
+        <td>${item.workload_id}</td>
+        <td contenteditable="true" class="edit-teacher-name">
+            ${item.last_name} ${item.first_name} ${item.middle_name || ''}
+        </td>
+        <td contenteditable="true" class="edit-discipline-name">
+            ${item.discipline_name || item.discipline_id}
+        </td>
+        <td contenteditable="true" class="edit-group-name">
+            ${item.group_name || item.group_id}
+        </td>
+        <td contenteditable="true" class="edit-lecture-hours">${item.lecture_hours}</td>
+        <td contenteditable="true" class="edit-practice-hours">${item.practice_hours}</td>
+        <td contenteditable="true" class="edit-consultation-hours">${item.consultation_hours}</td>
+        <td contenteditable="true" class="edit-course-project-hours">${item.course_project_hours}</td>
+        <td contenteditable="true" class="edit-exam-hours">${item.exam_hours}</td>
+        <td>
+            <button class="save-btn save-btn-workload">Сохранить</button>
+            <button class="delete-btn delete-btn-workload">Удалить</button>
+        </td>
+    </tr>`;
+        tableBodyWorkload.append(row);
+    });
+}
+
+    // --- Фильтр по группе ---
+    if (sortGroupSelectWorkload.length > 0) {
+        sortGroupSelectWorkload.on('change', function () {
+            currentWorkloadGroupFilter = $(this).val().trim();
+            loadWorkloads();
+        });
+    }
+
+    // --- Сброс фильтров ---
+    $('#reset-workload-filters').on('click', function () {
+        currentWorkloadGroupFilter = '';
+        sortGroupSelectWorkload.val('');
+        loadWorkloads();
+    });
+
+    // --- Подгрузка групп ---
+    function loadWorkloadGroups() {
+        const groupSelect = $('#sort-group-select');
+        if (groupSelect.length === 0) return;
+
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function (data) {
+            groupSelect.empty().append('<option value="">Все группы</option>');
+
+            data.forEach(group => {
+                groupSelect.append(`<option value="${group.group_id}">${group.group_name}</option>`);
             });
         }, 'json');
     }
 
+    // --- Инициализация при загрузке ---
     if ($('#workload-table').length > 0) {
         loadWorkloads();
+        loadWorkloadGroups();
     }
 
+    // --- Добавление новой нагрузки ---
     $('#add-workload-form').on('submit', function (e) {
         e.preventDefault();
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
-        formData.forEach(field => data[field.name] = field.value);
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data), function () {
-            $('#add-workload-form')[0].reset();
-            loadWorkloads();
+
+        formData.forEach(field => {
+            data[field.name] = field.value;
         });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data))
+            .done(function () {
+                $('#add-workload-form')[0].reset();
+                loadWorkloads();
+            })
+            .fail(function (xhr) {
+                alert("Ошибка добавления нагрузки");
+            });
     });
 
+    // --- Сохранение изменений ---
     $(document).on('click', '.save-btn-workload', function () {
         const row = $(this).closest('tr');
         const id = row.data('id');
@@ -844,9 +985,9 @@ $(document).ready(function () {
         const item = {
             action: 'update',
             workload_id: id,
-            teacher_id: row.find('.edit-teacher-id').text(),
-            discipline_id: row.find('.edit-discipline-id').text(),
-            group_id: row.find('.edit-group-id').text(),
+            teacher_id: row.find('.edit-teacher-name').data('teacher-id') || row.find('.edit-teacher-name').text(),
+            discipline_id: row.find('.edit-discipline-name').data('discipline-id') || row.find('.edit-discipline-name').text(),
+            group_id: row.find('.edit-group-name').data('group-id'),
             lecture_hours: row.find('.edit-lecture-hours').text(),
             practice_hours: row.find('.edit-practice-hours').text(),
             consultation_hours: row.find('.edit-consultation-hours').text(),
@@ -854,17 +995,26 @@ $(document).ready(function () {
             exam_hours: row.find('.edit-exam-hours').text()
         };
 
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(item), function () {
-            loadWorkloads();
-        });
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(item))
+            .done(function () {
+                loadWorkloads();
+            })
+            .fail(function (xhr) {
+                alert("Ошибка сохранения");
+            });
     });
 
+    // --- Удаление записи ---
     $(document).on('click', '.delete-btn-workload', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', workload_id: id };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data), function () {
-            loadWorkloads();
-        });
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data))
+            .done(function () {
+                loadWorkloads();
+            })
+            .fail(function (xhr) {
+                alert("Ошибка удаления");
+            });
     });
 });
 

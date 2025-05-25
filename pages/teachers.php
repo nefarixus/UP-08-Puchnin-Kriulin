@@ -12,7 +12,11 @@
         <input type="text" name="password" placeholder="Пароль"><br>
         <button type="submit" class="add-teachers-btn">Добавить</button>
     </form>
-
+   <h2 style="margin-top: 15px;">Поиск по логину</h2>
+    <div class="search-sort">
+        <input type="text" id="teacher-search-input" placeholder="Введите логин">
+        <button id="reset-teacher-filters">Сбросить</button>
+    </div>
     <h2 style="margin-top: 15px;">Список преподавателей</h2>
     <table id="teachers-table">
         <thead>

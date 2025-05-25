@@ -8,8 +8,8 @@
         <input type="number" name="group_id" placeholder="ID группы"><br>
         <input type="number" name="student_id" placeholder="ID студента (опционально)"><br>
         <input type="date" name="consultation_date"><br>
-        <input type="number" name="is_present" placeholder="Присутствовал (0 или 1)"><br>
-        <input type="number" name="is_completed" placeholder="Завершено (0 или 1)"><br>
+        <input type="number" name="is_present" min="0" max="1" placeholder="Присутствовал (0 или 1)"><br>
+        <input type="number" name="is_completed" min='0' max="1" placeholder="Завершено (0 или 1)"><br>
         <button class="add-students-btn" type="submit">Добавить</button>
     </form>
 

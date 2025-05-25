@@ -137,6 +137,16 @@ input[type="date"] {
     padding: 10px;
     border-radius: 5px;
 }
+.search-sort
+input[type="text"],
+input[type="number"], 
+input[type="date"],
+button {
+    background-color: white;
+    border: 1px solid #0060AC;
+    padding: 10px;
+    border-radius: 5px;
+}
 
 .add_form
 input[type="text"],
@@ -263,18 +273,22 @@ footer {
 
 
  /* Grade */
+.grade-cell {
+    padding: 5px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
 
-
-
-.grade2{
-    background-color: #E41613;
-}
-.grade3{
-    background-color: #EC9704;
-}
-.grade4{
-    background-color: #F0C72A;
-}
-.grade5{
-    background-color: #0CAC0C;
-}
+.green {
+     background-color: green; 
+    }
+.dark-yellow {
+     background-color: #cc9900; 
+    }
+.orange {
+     background-color: orange;
+     }
+.gray {
+     background-color: red; 
+    }
