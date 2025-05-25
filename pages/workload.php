@@ -15,6 +15,13 @@
         <button class="add-students-btn" type="submit">Добавить</button>
     </form>
 
+    <h2 style="margin-top: 15px;">Поиск и фильтрация</h2>
+    <div class="search-sort">
+        <select class="sort-group-select" id="sort-group-select">
+            <option value="">Все группы</option>
+        </select>
+    </div>
+
     <h2 style="margin-top:15px;">Список нагрузки</h2>
     <table id="workload-table">
         <thead>

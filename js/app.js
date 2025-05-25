@@ -800,19 +800,9 @@ $(document).ready(function () {
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
         formData.forEach(field => data[field.name] = field.value);
-
-        // Проверка данных
-        if (![0,1].includes(parseInt(data.is_present)) || ![0,1].includes(parseInt(data.is_completed))) {
-            alert("Поля 'Присутствует' и 'Завершено' должны быть 0 или 1");
-            return;
-        }
-
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(data), function () {
             $('#add-consultation-form')[0].reset();
             loadConsultations();
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            alert("Ошибка при добавлении консультации");
-            console.error(textStatus, errorThrown);
         });
     });
 
@@ -831,17 +821,8 @@ $(document).ready(function () {
             is_completed: row.find('.edit-is-completed').text()
         };
 
-        // Проверка данных
-        if (![0,1].includes(parseInt(item.is_present)) || ![0,1].includes(parseInt(item.is_completed))) {
-            alert("Поля 'Присутствует' и 'Завершено' должны быть 0 или 1");
-            return;
-        }
-
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(item), function () {
             loadConsultations();
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            alert("Ошибка при сохранении изменений");
-            console.error(textStatus, errorThrown);
         });
     });
 
@@ -850,45 +831,97 @@ $(document).ready(function () {
         const data = { action: 'delete', consultation_id: id };
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/consultation_api.php', JSON.stringify(data), function () {
             loadConsultations();
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            alert("Ошибка при удалении консультации");
-            console.error(textStatus, errorThrown);
         });
     });
 });
 
 /* workload */
 
-$(document).ready(function () {
-    const tableBody = $('#workload-table tbody');
+const tableBodyWorkload = $('#workload-table tbody');
+const workloadSearchInput = $('#workload-search-input');
+const sortGroupSelectWorkload = $('#sort-group-select');
 
-    function loadWorkloads() {
-        $.get('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', function (data) {
-            tableBody.empty();
-            data.forEach(item => {
-                const row = `
-                    <tr data-id="${item.workload_id}">
-                        <td>${item.workload_id}</td>
-                        <td contenteditable="true" class="edit-teacher-id">${item.teacher_id}</td>
-                        <td contenteditable="true" class="edit-discipline-id">${item.discipline_id}</td>
-                        <td contenteditable="true" class="edit-group-id">${item.group_id}</td>
-                        <td contenteditable="true" class="edit-lecture-hours">${item.lecture_hours}</td>
-                        <td contenteditable="true" class="edit-practice-hours">${item.practice_hours}</td>
-                        <td contenteditable="true" class="edit-consultation-hours">${item.consultation_hours}</td>
-                        <td contenteditable="true" class="edit-course-project-hours">${item.course_project_hours}</td>
-                        <td contenteditable="true" class="edit-exam-hours">${item.exam_hours}</td>
-                        <td>
-                            <button class="save-btn save-btn-workload">Сохранить</button>
-                            <button class="delete-btn delete-btn-workload">Удалить</button>
-                        </td>
-                    </tr>`;
-                tableBody.append(row);
+let currentWorkloadSearch = '';
+let currentWorkloadGroupFilter = '';
+
+function loadWorkloads() {
+    let url = '/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php';
+    let params = {};
+    if (currentWorkloadSearch) params.search = currentWorkloadSearch;
+    if (currentWorkloadGroupFilter) params.group_id = currentWorkloadGroupFilter;
+
+    $.get(url, params, function(data) {
+        renderWorkloads(data);
+    }, 'json');
+}
+
+function renderWorkloads(data) {
+    tableBodyWorkload.empty();
+
+    data.forEach(item => {
+        const row = `
+            <tr data-id="${item.workload_id}">
+                <td>${item.workload_id}</td>
+                <td contenteditable="true" class="edit-teacher-id">${item.teacher_id}</td>
+                <td contenteditable="true" class="edit-discipline-id">${item.discipline_id}</td>
+                <td contenteditable="true" class="edit-group-id">${item.group_name || item.group_id}</td>
+                <td contenteditable="true" class="edit-lecture-hours">${item.lecture_hours}</td>
+                <td contenteditable="true" class="edit-practice-hours">${item.practice_hours}</td>
+                <td contenteditable="true" class="edit-consultation-hours">${item.consultation_hours}</td>
+                <td contenteditable="true" class="edit-course-project-hours">${item.course_project_hours}</td>
+                <td contenteditable="true" class="edit-exam-hours">${item.exam_hours}</td>
+                <td>
+                    <button class="save-btn save-btn-workload">Сохранить</button>
+                    <button class="delete-btn delete-btn-workload">Удалить</button>
+                </td>
+            </tr>`;
+        tableBodyWorkload.append(row);
+    });
+}
+
+// --- Поиск ---
+    if (workloadSearchInput.length > 0) {
+        workloadSearchInput.on('input', function () {
+            currentWorkloadSearch = $(this).val().trim();
+            loadWorkloads();
+        });
+    }
+
+// --- Фильтр по группе ---
+    if (sortGroupSelectWorkload.length > 0) {
+        sortGroupSelectWorkload.on('change', function () {
+            currentWorkloadGroupFilter = $(this).val().trim();
+            loadWorkloads();
+        });
+    }
+
+// --- Сброс фильтров ---
+    $('#reset-workload-filters').on('click', function () {
+        currentWorkloadSearch = '';
+        currentWorkloadGroupFilter = '';
+        workloadSearchInput.val('');
+        sortGroupSelectWorkload.val('');
+        loadWorkloads();
+    });
+
+// --- Подгрузка групп ---
+    function loadWorkloadGroups() {
+        const groupSelect = $('#sort-group-select');
+        if (groupSelect.length === 0) return;
+
+        $.get('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', function(data) {
+            groupSelect.empty().append('<option value="">Все группы</option>');
+
+            data.forEach(group => {
+                groupSelect.append(`<option value="${group.group_id}">${group.group_name}</option>`);
             });
         }, 'json');
     }
 
+// --- Инициализация при загрузке ---
     if ($('#workload-table').length > 0) {
         loadWorkloads();
+        loadWorkloadGroups(); // Подгружаем группы для фильтра
     }
 
     $('#add-workload-form').on('submit', function (e) {
@@ -910,8 +943,8 @@ $(document).ready(function () {
             action: 'update',
             workload_id: id,
             teacher_id: row.find('.edit-teacher-id').text(),
-            discipline_id: row.find('.edit-discipline-id').text(),
-            group_id: row.find('.edit-group-id').text(),
+            discipline_id: parseInt(row.find('.edit-discipline-name').data('discipline-id')) || row.find('.edit-discipline-id').text(),
+            group_id: parseInt(row.find('.edit-group-name').data('group-id')) || row.find('.edit-group-id').text(),
             lecture_hours: row.find('.edit-lecture-hours').text(),
             practice_hours: row.find('.edit-practice-hours').text(),
             consultation_hours: row.find('.edit-consultation-hours').text(),
@@ -924,14 +957,14 @@ $(document).ready(function () {
         });
     });
 
-    $(document).on('click', '.delete-btn-workload', function () {
+     $(document).on('click', '.delete-btn-workload', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', workload_id: id };
         $.post('/UP-08-Puchnin-Kriulin/controllers/api/workload_api.php', JSON.stringify(data), function () {
             loadWorkloads();
         });
     });
-});
+
 
 /* lesson */
 

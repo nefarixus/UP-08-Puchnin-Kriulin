@@ -11,3 +11,10 @@
 [2025-05-25 02:36:01] disciplines.php: Поле "action" обязательно
 [2025-05-25 02:36:01] disciplines.php: Поле "action" обязательно
 [2025-05-25 02:36:02] disciplines.php: Поле "action" обязательно
+[2025-05-25 15:53:04] Invalid request method: POST
+[2025-05-25 16:40:26] Invalid request method: POST
+[2025-05-25 16:40:38] Invalid request method: POST
+[2025-05-25 16:54:51] Invalid request method: POST
+[2025-05-25 17:07:47] Invalid request method: POST
+[2025-05-25 17:07:54] Invalid request method: POST
+[2025-05-25 17:08:11] Invalid request method: POST

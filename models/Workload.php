@@ -22,13 +22,40 @@
         }
 
         // Получить всю нагрузку
-        public static function Get() {
+        public static function Get($filters = []) {
             global $db_connection;
             $items = [];
-            $result = mysqli_query($db_connection, "SELECT * FROM Teacher_Workload");
+
+            $whereClauses = [];
+
+            if (!empty($filters['search'])) {
+                $search = mysqli_real_escape_string($db_connection, $filters['search']);
+                $whereClauses[] = "(sg.group_name LIKE '%$search%' OR d.name LIKE '%$search%')";
+            }
+
+            if (!empty($filters['group_id'])) {
+                $groupId = intval($filters['group_id']); // Защита от SQL-инъекций
+                if ($groupId > 0) {
+                    $whereClauses[] = "w.group_id = '$groupId'";
+                }
+            }
+
+            $where = !empty($whereClauses) ? "WHERE " . implode(" AND ", $whereClauses) : "";
+
+            $query = "
+                SELECT w.*, sg.group_name
+                FROM Teacher_Workload w
+                LEFT JOIN StudentGroups sg ON w.group_id = sg.group_id
+                LEFT JOIN Disciplines d ON w.discipline_id = d.discipline_id
+                $where
+            ";
+
+            $result = mysqli_query($db_connection, $query);
+
             while ($row = mysqli_fetch_assoc($result)) {
                 $items[] = new Workload((object)$row);
             }
+
             return $items;
         }
 

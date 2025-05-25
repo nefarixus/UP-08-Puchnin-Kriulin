@@ -6,11 +6,22 @@
 
     header("Content-Type: application/json");
 
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        $items = Workload::Get();
-        echo json_encode($items);
-        exit();
-    } else {
+   if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $filters = [];
+
+    if (!empty($_GET['search'])) {
+        $filters['search'] = $_GET['search'];
+    }
+
+    if (!empty($_GET['group_id'])) {
+        $filters['group_id'] = $_GET['group_id'];
+    }
+
+    $items = Workload::Get($filters);
+    echo json_encode($items);
+    exit();
+    }
+    else {
         logError("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
     }
 
