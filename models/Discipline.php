@@ -3,10 +3,6 @@
     class Discipline {
         public $discipline_id;
         public $discipline_name;
-        public $group_id;
-        public $group_name;
-        public $lesson_count;
-        public $total_hours;
 
         public function __construct($params = null) {
             if ($params !== null) {
@@ -21,7 +17,7 @@
         public static function Get() {
             global $db_connection;
             $items = [];
-            $result = mysqli_query($db_connection, "SELECT * FROM Disciplines");
+            $result = mysqli_query($db_connection, "SELECT * FROM Disciplines ORDER BY discipline_id ASC");
             while ($row = mysqli_fetch_assoc($result)) {
                 $items[] = new Discipline((object)$row);
             }
@@ -43,18 +39,14 @@
         public function Delete() {
             global $db_connection;
 
-            $programQuery = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Discipline_Programs WHERE discipline_id = $this->discipline_id");
-            $programs = mysqli_fetch_assoc($programQuery)['count'];
+            $checkUsage = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Teacher_Workload WHERE discipline_id = $this->discipline_id");
+            $used = mysqli_fetch_assoc($checkUsage)['count'] > 0;
 
-            $workloadQuery = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Teacher_Workload WHERE discipline_id = $this->discipline_id");
-            $workloads = mysqli_fetch_assoc($workloadQuery)['count'];
-
-            if ($programs > 0 || $workloads > 0) {
+            if ($used) {
                 return false;
             }
 
-            $query = "DELETE FROM Disciplines WHERE discipline_id = $this->discipline_id";
-            return mysqli_query($db_connection, $query);
+            return mysqli_query($db_connection, "DELETE FROM Disciplines WHERE discipline_id = $this->discipline_id");
         }
 
         public function validate() {
@@ -62,8 +54,6 @@
 
             if (empty($this->discipline_name)) {
                 $errors[] = 'Название дисциплины обязательно';
-            } elseif (!preg_match("/^[а-яА-ЯёЁa-zA-Z0-9\- ]+$/u", $this->discipline_name)) {
-                $errors[] = 'Название дисциплины должно содержать только буквы, цифры, дефис или пробел';
             }
 
             return $errors;

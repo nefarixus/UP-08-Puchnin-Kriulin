@@ -3,6 +3,7 @@
     class DisciplineProgram {
         public $program_id;
         public $discipline_id;
+        public $discipline_name;
         public $topic;
         public $lesson_type;
         public $hours;
@@ -53,6 +54,29 @@
             global $db_connection;
             $query = "DELETE FROM Discipline_Programs WHERE program_id = $this->program_id";
             return mysqli_query($db_connection, $query);
+        }
+
+        public function validate() {
+            $errors = [];
+
+            if (empty($this->discipline_id) || !is_numeric($this->discipline_id)) {
+                $errors[] = 'ID дисциплины обязателен и должен быть числом';
+            }
+
+            if (empty($this->topic)) {
+                $errors[] = 'Тема занятия обязательна';
+            }
+
+            $validLessonTypes = ['лекция', 'практика', 'консультация', 'курсовая работа', 'экзамен'];
+            if (empty($this->lesson_type) || !in_array($this->lesson_type, $validLessonTypes)) {
+                $errors[] = 'Неверный тип занятия';
+            }
+
+            if (empty($this->hours) || !is_numeric($this->hours)) {
+                $errors[] = 'Часы должны быть числом';
+            }
+
+            return $errors;
         }
     }
 ?>
