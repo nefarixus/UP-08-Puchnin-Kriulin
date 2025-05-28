@@ -485,8 +485,7 @@ function loadPrograms(filters = {}) {
     if (filters.search && filters.search.trim() !== '') {
         $.post(url, { search: filters.search }, function(data) {
             renderPrograms(data);
-        }, 'json')
-        .fail(xhr => {
+        }, 'json').fail(xhr => {
             alert(xhr.responseJSON.message || 'Ошибка при поиске программы');
         });
     } else if (filters.discipline_id) {
@@ -520,7 +519,8 @@ function renderPrograms(data) {
         const row = `
             <tr data-id="${program.program_id}">
                 <td>${program.program_id}</td>
-                <td class="edit-discipline-id">${program.discipline_name || '—'}</td>
+                <td class="edit-discipline-id" style="display:none">${program.discipline_id}</td>
+                <td class="edit-discipline-name">${program.discipline_name || '—'}</td>
                 <td contenteditable="true" class="edit-topic">${program.topic || ''}</td>
                 <td contenteditable="true" class="edit-lesson-type">${program.lesson_type || ''}</td>
                 <td contenteditable="true" class="edit-hours">${program.hours || ''}</td>
@@ -533,32 +533,41 @@ function renderPrograms(data) {
     });
 }
 
+// --- Загрузка дисциплин в форму добавления ---
 function loadDisciplineOptionsForProgram() {
     const select = $('#program-discipline-select');
     if (select.length === 0) return;
 
     $.get('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', function(data) {
-        select.empty().append('<option class="discipline-option-select" value="">Выберите дисциплину</option>');
+        select.empty().append('<option value="">Выберите дисциплину</option>');
         data.forEach(discipline => {
             select.append(`<option value="${discipline.discipline_id}">${discipline.discipline_name}</option>`);
         });
     }, 'json');
 }
 
-$('#add-program-form').on('submit', function (e) {
+// --- Форма добавления ---
+$('#add-program-form').on('submit', function(e) {
     e.preventDefault();
-    const formData = $(this).serializeArray();
-    const data = { action: 'create' };
 
-    formData.forEach(field => {
-        data[field.name] = field.value;
-    });
+    const disciplineId = $('#program-discipline-select').val();
+    const topic = $('#program-topic').val().trim();
+    const lessonType = $('#program-lesson-type').val().trim();
+    const hours = $('#program-hours').val().trim();
 
-    // Защита от пустых значений
-    if (!data.discipline_id || data.discipline_id === '') {
-        alert('Выберите дисциплину');
+    // Проверка обязательных полей
+    if (!disciplineId || !topic || !lessonType || !hours) {
+        alert('Все поля обязательны для заполнения');
         return;
     }
+
+    const data = {
+        action: 'create',
+        discipline_id: parseInt(disciplineId), // ← Явное приведение к числу
+        topic: topic,
+        lesson_type: lessonType,
+        hours: parseInt(hours)
+    };
 
     $.post('/UP-08-Puchnin-Kriulin/controllers/api/program_api.php', JSON.stringify(data))
         .done(() => {
@@ -566,56 +575,34 @@ $('#add-program-form').on('submit', function (e) {
             loadPrograms();
         })
         .fail(xhr => {
-            alert(xhr.responseJSON.message || 'Ошибка при добавлении программы');
+            const response = xhr.responseJSON;
+            alert(response.message || response.errors?.join('\n') || 'Ошибка при добавлении программы');
         });
 });
 
-$(document).ready(function () {
-    if ($('#add-program-form').length > 0) {
-        loadDisciplineOptionsForProgram();
-    }
-});
-
+// --- Редактирование записи (без дисциплины) ---
 $(document).on('click', '.save-btn-programs', function () {
     const row = $(this).closest('tr');
     const programId = row.data('id');
 
-    // Создаём выпадающий список
-    const disciplineSelect = $('<select class="discipline-option-select">')
-        .addClass('edit-discipline-id')
-        .append($('<option>').val('').text('Выберите дисциплину'));
+    const updatedData = {
+        action: 'update',
+        program_id: programId,
+        discipline_id: row.find('.edit-discipline-id').text().trim(),
+        topic: row.find('.edit-topic').text().trim(),
+        lesson_type: row.find('.edit-lesson-type').text().trim(),
+        hours: row.find('.edit-hours').text().trim()
+    };
 
-    // Подгружаем все дисциплины
-    $.get('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', function(data) {
-        data.forEach(discipline => {
-            const selected = discipline.discipline_id == row.find('.edit-discipline-id').text().trim()
-                ? 'selected'
-                : '';
-            disciplineSelect.append(
-                `<option value="${discipline.discipline_id}" ${selected}>${discipline.discipline_name}</option>`
-            );
+    $.post('/UP-08-Puchnin-Kriulin/controllers/api/program_api.php', JSON.stringify(updatedData))
+        .done(() => loadPrograms())
+        .fail(xhr => {
+            let msg = xhr.responseJSON.message || xhr.responseJSON.errors?.join('\n') || 'Ошибка при обновлении программы';
+            alert(msg);
         });
-
-        row.find('.edit-discipline-id').replaceWith(disciplineSelect);
-    }, 'json');
-
-    // Обработка изменения выпадающего списка
-    row.find('.edit-discipline-id').on('change', function () {
-        const updatedData = {
-            action: 'update',
-            program_id: programId,
-            discipline_id: disciplineSelect.val(),
-            topic: row.find('.edit-topic').text().trim(),
-            lesson_type: row.find('.edit-lesson-type').text().trim(),
-            hours: row.find('.edit-hours').text().trim()
-        };
-
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/program_api.php', JSON.stringify(updatedData))
-            .done(() => loadPrograms())
-            .fail(() => alert('Ошибка при обновлении'));
-    });
 });
 
+// --- Удаление записи ---
 $(document).on('click', '.delete-btn-programs', function () {
     const id = $(this).closest('tr').data('id');
     const data = { action: 'delete', program_id: id };
@@ -627,11 +614,18 @@ $(document).on('click', '.delete-btn-programs', function () {
         });
 });
 
-    // --- TEACHERS ---
-    const tableBodyTeachers = $('#teachers-table tbody');
-    const teacherSearchInput = $('#teacher-search-input');
+// --- При загрузке страницы подгружаем дисциплины ---
+$(document).ready(function () {
+    if ($('#add-program-form').length > 0) {
+        loadDisciplineOptionsForProgram();
+    }
+});
 
-    let currentTeacherLoginFilter = '';
+// --- TEACHERS ---
+const tableBodyTeachers = $('#teachers-table tbody');
+const teacherSearchInput = $('#teacher-search-input');
+
+let currentTeacherLoginFilter = '';
 
 function loadTeachers() {
     let url = '/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php';
@@ -665,61 +659,61 @@ function loadTeachers() {
     });
 }
 
-    // --- Поиск по логину ---
-    if (teacherSearchInput.length > 0) {
-        teacherSearchInput.on('input', function () {
-            currentTeacherLoginFilter = $(this).val().trim();
-            loadTeachers();
-        });
-    }
-
-    // --- Сброс фильтров ---
-    $('#reset-teacher-filters').on('click', function () {
-        currentTeacherLoginFilter = '';
-        teacherSearchInput.val('');
+// --- Поиск по логину ---
+if (teacherSearchInput.length > 0) {
+    teacherSearchInput.on('input', function () {
+        currentTeacherLoginFilter = $(this).val().trim();
         loadTeachers();
     });
+}
 
-    // --- Загрузка при старте ---
-    if ($('#teachers-table').length > 0) {
+// --- Сброс фильтров ---
+$('#reset-teacher-filters').on('click', function () {
+    currentTeacherLoginFilter = '';
+    teacherSearchInput.val('');
+    loadTeachers();
+});
+
+// --- Загрузка при старте ---
+if ($('#teachers-table').length > 0) {
+    loadTeachers();
+}
+
+$('#add-teacher-form').on('submit', function (e) {
+    e.preventDefault();
+    const formData = $(this).serializeArray();
+    const data = { action: 'create' };
+    formData.forEach(field => data[field.name] = field.value);
+    $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(data), function () {
+        $('#add-teacher-form')[0].reset();
         loadTeachers();
-    }
-
-    $('#add-teacher-form').on('submit', function (e) {
-        e.preventDefault();
-        const formData = $(this).serializeArray();
-        const data = { action: 'create' };
-        formData.forEach(field => data[field.name] = field.value);
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(data), function () {
-            $('#add-teacher-form')[0].reset();
-            loadTeachers();
-        });
     });
+});
 
-    $(document).on('click', '.save-btn-teachers', function () {
-        const row = $(this).closest('tr');
-        const id = row.data('id');
-        const teacher = {
-            action: 'update',
-            teacher_id: id,
-            last_name: row.find('.edit-last-name').text(),
-            first_name: row.find('.edit-first-name').text(),
-            middle_name: row.find('.edit-middle-name').text() || null,
-            login: row.find('.edit-login').text(),
-            password: row.find('.edit-password').text()
-        };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(teacher), function () {
-            loadTeachers();
-        });
+$(document).on('click', '.save-btn-teachers', function () {
+    const row = $(this).closest('tr');
+    const id = row.data('id');
+    const teacher = {
+        action: 'update',
+        teacher_id: id,
+        last_name: row.find('.edit-last-name').text(),
+        first_name: row.find('.edit-first-name').text(),
+        middle_name: row.find('.edit-middle-name').text() || null,
+        login: row.find('.edit-login').text(),
+        password: row.find('.edit-password').text()
+    };
+    $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(teacher), function () {
+        loadTeachers();
     });
+});
 
-    $(document).on('click', '.delete-btn-teachers', function () {
-        const id = $(this).closest('tr').data('id');
-        const data = { action: 'delete', teacher_id: id };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(data), function () {
-            loadTeachers();
-        });
+$(document).on('click', '.delete-btn-teachers', function () {
+    const id = $(this).closest('tr').data('id');
+    const data = { action: 'delete', teacher_id: id };
+    $.post('/UP-08-Puchnin-Kriulin/controllers/api/teacher_api.php', JSON.stringify(data), function () {
+        loadTeachers();
     });
+});
 
 
 /*Grade */

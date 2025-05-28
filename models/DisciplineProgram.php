@@ -30,23 +30,29 @@
 
         public function Insert() {
             global $db_connection;
+
             $query = "INSERT INTO Discipline_Programs (
                         discipline_id, topic, lesson_type, hours
                     ) VALUES (
-                        '$this->discipline_id', '$this->topic',
-                        '$this->lesson_type', '$this->hours'
+                        '$this->discipline_id', 
+                        '$this->topic',
+                        '$this->lesson_type', 
+                        '$this->hours'
                     )";
+
             return mysqli_query($db_connection, $query);
         }
 
         public function Update() {
             global $db_connection;
+
             $query = "UPDATE Discipline_Programs SET
                         discipline_id = '$this->discipline_id',
                         topic = '$this->topic',
                         lesson_type = '$this->lesson_type',
                         hours = '$this->hours'
                     WHERE program_id = $this->program_id";
+
             return mysqli_query($db_connection, $query);
         }
 

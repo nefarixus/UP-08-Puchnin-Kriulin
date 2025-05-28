@@ -63,17 +63,18 @@
                 case 'update':
                     $item = new DisciplineProgram();
                     $item->program_id = $data['program_id'];
+
+                    // Убедимся, что мы получаем все поля
                     foreach ($data as $key => $value) {
                         if (property_exists($item, $key)) {
                             $item->{$key} = $value;
                         }
                     }
 
-                    $errors = $item->validate();
-                    if (!empty($errors)) {
+                    // Явно проверяем, что discipline_id установлен
+                    if (empty($item->discipline_id) || !is_numeric($item->discipline_id)) {
                         http_response_code(400);
-                        echo json_encode(['status' => 'error', 'errors' => $errors]);
-                        logError("programs.php: ". implode('; ', $errors));
+                        echo json_encode(['status' => 'error', 'errors' => ['ID дисциплины обязателен']]);
                         exit();
                     }
 
