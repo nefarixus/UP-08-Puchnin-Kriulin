@@ -1088,9 +1088,17 @@ $(document).ready(function () {
         const formData = $(this).serializeArray();
         const data = { action: 'create' };
         formData.forEach(field => data[field.name] = field.value);
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(data), function () {
-            $('#add-lesson-form')[0].reset();
-            loadLessons();
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(data), function (response) {
+            if (response.status === 'success') {
+                alert(response.message || 'Занятие добавлено');
+                $('#add-lesson-form')[0].reset();
+                loadLessons();
+            } else {
+                alert('Ошибка: ' + response.message);
+            }
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            alert('Произошла ошибка: ' + textStatus);
         });
     });
 
@@ -1108,16 +1116,35 @@ $(document).ready(function () {
             duration_minutes: row.find('.edit-duration-minutes').text()
         };
 
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(item), function () {
-            loadLessons();
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(item), function (response) {
+            if (response.status === 'success') {
+                alert(response.message || 'Занятие обновлено');
+                loadLessons();
+            } else {
+                alert('Ошибка: ' + response.message);
+            }
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            alert('Произошла ошибка: ' + textStatus);
         });
     });
 
     $(document).on('click', '.delete-btn-lesson', function () {
         const id = $(this).closest('tr').data('id');
         const data = { action: 'delete', lesson_id: id };
-        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(data), function () {
-            loadLessons();
-        });
+
+        $.post('/UP-08-Puchnin-Kriulin/controllers/api/lesson_api.php', JSON.stringify(data), null, 'json')
+            .done(function(response) {
+                if (response.status === 'success') {
+                    alert('Занятие успешно удалено');
+                    loadLessons();
+                } else {
+                    // Всё, что не success — показываем как ошибку
+                    alert(response.message || 'Произошла ошибка');
+                }
+            })
+            .fail(function(xhr) {
+                // Если вообще всё сломалось (например, 500)
+                alert('Ошибка: ' + (xhr.responseJSON?.message || 'Не удалось связаться с сервером'));
+            });
     });
 });

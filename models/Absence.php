@@ -6,8 +6,6 @@
         public $student_id;
         public $minutes_missed;
         public $explanatory_note_path;
-
-        // Эти поля приходят из JOIN с Students и StudentGroups
         public $last_name;
         public $group_name;
 
