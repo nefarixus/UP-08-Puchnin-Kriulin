@@ -362,7 +362,20 @@ const tableBodyGroups = $('#groups-table tbody');
 
 function renderGroups(data) {
     tableBodyGroups.empty();
-    data.forEach(group => {
+
+    let items = data.status === 'success' ? data.data : data;
+
+    if (!Array.isArray(items)) {
+        alert('Ошибка: некорректные данные');
+        return;
+    }
+
+    if (items.length === 0) {
+        tableBodyGroups.append('<tr><td colspan="3">Нет данных</td></tr>');
+        return;
+    }
+
+    items.forEach(group => {
         const row = `
             <tr data-id="${group.group_id}">
                 <td>${group.group_id}</td>
@@ -474,6 +487,39 @@ $(document).on('click', '.delete-btn-groups', function () {
             alert('Ошибка при удалении группы');
         }
     });
+});
+
+$(document).on('click', '.save-btn-groups', function () {
+    const row = $(this).closest('tr');
+    const groupId = row.data('id'); // ID группы
+
+    const updatedData = {
+        action: 'update',
+        group_id: groupId,
+        group_name: row.find('.edit-group-name').text().trim() // Например, редактируемое поле
+    };
+
+    // Валидация
+    if (!updatedData.group_name) {
+        alert("Название группы обязательно");
+        return;
+    }
+
+    $.post('/UP-08-Puchnin-Kriulin/controllers/api/group_api.php', JSON.stringify(updatedData))
+        .done(() => {
+            alert('Группа успешно обновлена');
+            loadGroups();
+        })
+        .fail(xhr => {
+            let msg = 'Ошибка при обновлении группы';
+            try {
+                const json = JSON.parse(xhr.responseText);
+                msg = json.message || json.errors?.join('\n') || msg;
+            } catch (e) {
+                msg = xhr.responseText;
+            }
+            alert(msg);
+        });
 });
 
 // --- DISCIPLINE PROGRAMS ---

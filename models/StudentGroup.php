@@ -19,7 +19,7 @@
             $items = [];
             $result = mysqli_query($db_connection, "SELECT * FROM StudentGroups");
             while ($row = mysqli_fetch_assoc($result)) {
-                $items[] = new StudentGroup((object)$row);
+                $items[] = new self((object)$row);
             }
             return $items;
         }
@@ -39,20 +39,15 @@
         public function Delete() {
             global $db_connection;
 
-            // Проверяем, есть ли студенты в этой группе
-            $studentsQuery = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Students WHERE group_id = $this->group_id");
-            $students = mysqli_fetch_assoc($studentsQuery)['count'];
+            // Проверяем, есть ли связанные студенты
+            $checkQuery = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Students WHERE group_id = $this->group_id");
+            $used = mysqli_fetch_assoc($checkQuery)['count'] > 0;
 
-            // Проверяем, есть ли нагрузка у преподавателей на эту группу
-            $workloadQuery = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Teacher_Workload WHERE group_id = $this->group_id");
-            $workload = mysqli_fetch_assoc($workloadQuery)['count'];
-
-            if ($students > 0 || $workload > 0) {
+            if ($used) {
                 return false;
             }
 
-            $query = "DELETE FROM StudentGroups WHERE group_id = $this->group_id";
-            return mysqli_query($db_connection, $query);
+            return mysqli_query($db_connection, "DELETE FROM StudentGroups WHERE group_id = $this->group_id");
         }
 
         public function validate() {
@@ -60,8 +55,6 @@
 
             if (empty($this->group_name)) {
                 $errors[] = 'Название группы обязательно';
-            } elseif (!preg_match("/^[а-яА-ЯёЁa-zA-Z0-9\- ]+$/u", $this->group_name)) {
-                $errors[] = 'Название группы должно содержать только буквы, цифры, пробелы или дефис';
             }
 
             return $errors;

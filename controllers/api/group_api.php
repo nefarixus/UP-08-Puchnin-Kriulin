@@ -57,7 +57,6 @@
             case 'update':
                 $item = new StudentGroup();
                 $item->group_id = $data['group_id'];
-
                 foreach ($data as $key => $value) {
                     if (property_exists($item, $key)) {
                         $item->{$key} = $value;
@@ -72,11 +71,10 @@
                 }
 
                 if ($item->Update()) {
-                    echo json_encode(['status' => 'success']);
+                    echo json_encode(['status' => 'success', 'data' => StudentGroup::Get()]);
                 } else {
                     http_response_code(500);
-                    echo json_encode(['status' => 'error', 'message' => 'Ошибка при обновлении группы']);
-                    logError("student_groups.php: Ошибка при обновлении группы");
+                    echo json_encode(['status' => 'error', 'message' => 'Ошибка при обновлении']);
                 }
                 break;
 
