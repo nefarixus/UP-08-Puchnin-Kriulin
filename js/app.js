@@ -315,9 +315,13 @@ $(document).on('click', '.save-btn-absences', function () {
 
 $(document).on('click', '.delete-btn-absences', function () {
     const id = $(this).closest('tr').data('id');
+    console.log("Отправляем ID:", id);
     $.post('/UP-08-Puchnin-Kriulin/controllers/api/absence_api.php', JSON.stringify({ action: 'delete', absence_id: id }))
         .done(() => loadAbsences())
-        .fail(xhr => alert('Ошибка: ' + xhr.responseText));
+        .fail(xhr => {
+            let msg = xhr.responseJSON?.message || 'Ошибка при удалении';
+            alert(msg);
+        });
 });
 
 function uploadFile(file) {
@@ -577,9 +581,9 @@ $(document).on('click', '.save-btn-programs', function () {
     const programId = row.data('id');
 
     // Создаём выпадающий список
-    const disciplineSelect = $('<select>')
+    const disciplineSelect = $('<select class="discipline-option-select">')
         .addClass('edit-discipline-id')
-        .append($('<option>').val('').text('-- Выберите дисциплину --'));
+        .append($('<option>').val('').text('Выберите дисциплину'));
 
     // Подгружаем все дисциплины
     $.get('/UP-08-Puchnin-Kriulin/controllers/api/discipline_api.php', function(data) {

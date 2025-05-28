@@ -91,10 +91,10 @@
                     $absence->absence_id = $data['absence_id'];
 
                     if ($absence->Delete()) {
-                        echo json_encode(['status' => 'success', 'data' => Absence::Get()]);
+                        echo json_encode(['status' => 'success', 'message' => 'Пропуск успешно удален']);
                     } else {
                         http_response_code(400);
-                        echo json_encode(['status' => 'error', 'message' => 'Нельзя удалить — есть связанные данные']);
+                        echo json_encode(['status' => 'error', 'message' => 'Нельзя удалить пропуск — есть связанные данные']);
                     }
                     break;
 

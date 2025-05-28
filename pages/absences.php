@@ -28,12 +28,5 @@
             </thead>
             <tbody></tbody>
         </table>
-
-        <!-- Поиск -->
-        <h2>Поиск по пропуску</h2>
-        <div class="search-bar">
-            <input type="text" id="absence-search-input" placeholder="Поиск по ФИО или группе">
-            <button class="reset-absence-filters" id="reset-absence-filters">Сбросить</button>
-        </div>
     </main>
 <?php include "../includes/parts/footer.php"; ?>

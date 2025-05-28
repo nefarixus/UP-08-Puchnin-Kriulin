@@ -73,18 +73,30 @@
             return mysqli_query($db_connection, $query);
         }
 
+        
         public function Delete() {
             global $db_connection;
 
-            // Проверка на связи
-            $checkQuery = mysqli_query($db_connection, "SELECT COUNT(*) AS count FROM Grades WHERE absence_id = $this->absence_id");
-            $used = mysqli_fetch_assoc($checkQuery)['count'] > 0;
-
-            if ($used) {
+            // Проверяем наличие связей в оценках через lesson_id и student_id
+            $query = "SELECT COUNT(*) AS count 
+                    FROM Grades g
+                    WHERE g.lesson_id = (SELECT lesson_id FROM Absences WHERE absence_id = $this->absence_id)
+                        AND g.student_id = (SELECT student_id FROM Absences WHERE absence_id = $this->absence_id)";
+            
+            $checkQuery = mysqli_query($db_connection, $query);
+            if (!$checkQuery) {
+                error_log("Ошибка проверки связей: " . mysqli_error($db_connection));
                 return false;
             }
 
-            return mysqli_query($db_connection, "DELETE FROM Absences WHERE absence_id = $this->absence_id");
+            $used = mysqli_fetch_assoc($checkQuery)['count'] > 0;
+            if ($used) {
+                return false; // Есть связанные оценки
+            }
+
+            // Удаление пропуска
+            $deleteQuery = "DELETE FROM Absences WHERE absence_id = $this->absence_id";
+            return mysqli_query($db_connection, $deleteQuery);
         }
 
         public function validate() {

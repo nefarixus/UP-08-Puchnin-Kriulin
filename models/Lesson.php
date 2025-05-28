@@ -94,10 +94,6 @@
                 $errors[] = 'ID преподавателя должен быть положительным числом';
             }
 
-            if (empty($this->lesson_date) || !preg_match("/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/", $this->lesson_date)) {
-                $errors[] = 'Дата и время должны быть указаны в формате даты и времени (YYYY-MM-DDTHH:MM)';
-            }
-
             if (!is_numeric($this->duration_minutes) || intval($this->duration_minutes) <= 0) {
                 $errors[] = 'Длительность должна быть положительным числом';
             }
